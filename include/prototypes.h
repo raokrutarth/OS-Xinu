@@ -10,9 +10,23 @@ extern	int32	arp_alloc();
 extern	void	arp_ntoh(struct arppacket *);
 extern	void	arp_hton(struct arppacket *);
 
-/* in file ascdate.c */
 
+
+/* in file void printsegaddr.c */
+extern void printsegaddr();
+
+/* in file ascdate.c */
 extern	status	ascdate(uint32, char *);
+
+/* in net2hostlgcc.c */
+extern long net2hostlgcc(long tc);
+
+/* in file net2hostlasm.c */
+extern long net2hostlasm(long tc);
+
+/* in file net2hostl.S */
+
+extern	long net2hostl(long to_convert);
 
 /* in file bufinit.c */
 
