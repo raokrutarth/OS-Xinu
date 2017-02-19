@@ -10,7 +10,9 @@ extern	int32	arp_alloc();
 extern	void	arp_ntoh(struct arppacket *);
 extern	void	arp_hton(struct arppacket *);
 
+/* in file rcreate.c */
 
+extern	pid32	rcreate(void *, uint32, pri16, char *, uint32, ...);
 
 /* in file void printsegaddr.c */
 extern void printsegaddr();

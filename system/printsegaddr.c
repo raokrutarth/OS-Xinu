@@ -24,21 +24,25 @@ void printsegaddr()
 	kprintf("\n***Printing memory segments***\n");
 	
 	kprintf("Start of text = %X \n", (uint32)&text);
+	kprintf("4 bytes at text (*&text) = %X \n", (uint32)*&text);
 	//kprintf("etext = %X \n", (uint32)&etext);
 	uint32 text_size= (uint32)&etext - (uint32)&text;
 	kprintf("Size of text : %d bytes\n", text_size);
 	
 	
-	kprintf("Start of data = %X \n", (uint32)&data);	
+	kprintf("Start of data = %X \n", (uint32)&data);
+	kprintf("4 bytes at data (*&data) = %X \n", (uint32)*(&data));	
 	//kprintf("&_edata = %X \n", (uint32)&edata);	
 	uint32 data_size = (uint32)&edata - (uint32)&data;
 	kprintf("Size of data : %d bytes\n", data_size);
 	
 	kprintf("Start of bss = %X \n", (uint32)&bss);
+	kprintf("4 bytes at bss (*&bss) = %X \n", (uint32)*&bss);
 	uint32 bss_size = (uint32)&ebss - (uint32)&bss;
 	kprintf("Size of bss : %d bytes \n", bss_size);
 	
 	kprintf("End of bss = %X \n", (uint32)&ebss);
+	kprintf("4 bytes at end of BSS (*&ebss) = %4X \n", (uint32)*&ebss);
 	
 	kprintf("\n");	
 }
