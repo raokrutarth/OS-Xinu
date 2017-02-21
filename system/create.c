@@ -58,6 +58,8 @@ pid32	create(
 	prptr->prdesc[1] = CONSOLE;
 	prptr->prdesc[2] = CONSOLE;
 
+	prptr->prcpuused = 1; /* set CPU time used so far to 1 */
+
 	/* Initialize stack as if the process was called		*/
 
 	*saddr = STACKMAGIC;

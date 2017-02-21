@@ -46,6 +46,8 @@ pid32	rcreate(
 	prptr->prsem = -1;
 	prptr->prparent = (pid32)getpid();
 	prptr->prhasmsg = FALSE;
+	
+	prptr->prcpuused = 1; /* set CPU time used so far to 1 */
 
 	/* Set up stdin, stdout, and stderr descriptors for the shell	*/
 	prptr->prdesc[0] = CONSOLE;

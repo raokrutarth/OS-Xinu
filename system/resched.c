@@ -41,10 +41,14 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	ptnew = &proctab[currpid];
 	ptnew->prstate = PR_CURR;
 	preempt = QUANTUM;		/* Reset time slice for process	*/
+
+	/* remember current time since boot */
+	ptnew->prctxswstart = clktimefine;
+	/* add the the CPU time for which the new process ran */ 
+	ptold->prcpuused += (clktimefine - ptold->prctxswstart);
+
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
-
 	/* Old process returns here when resumed */
-
 	return;
 }
 
