@@ -25,13 +25,19 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	ptold = &proctab[currpid];
 
 	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
-		if (ptold->prprio > firstkey(readylist)) {
+
+		//kprintf("[1] comparing prio_old (%s): %u, prio_list : %u\n", ptold->prname, ptold->prprio, firstkey(readylist) );
+		if (ptold->prprio > firstkey(readylist) ) {
 			return;
 		}
-
+		//double inversePrio = 1.0 / (ptold->prcpuused);
+		//uint32 newPrio = (int) (inversePrio * 1000);
+		//ptold->prprio = newPrio;
 		/* Old process will no longer remain current */
-
-		ptold->prstate = PR_READY;
+		ptold->prstate = PR_READY;	
+		ptold->prprio = MAXKEY - ptold->prcpuused;
+		//kprintf("null proc cpu used: %d", ptold->prcpuused);
+		//kprintf("[1] Inserting process %s, with prio: %d", ptold->prname, ptold->prprio);	
 		insert(currpid, readylist, ptold->prprio);
 	}
 
@@ -41,11 +47,10 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	ptnew = &proctab[currpid];
 	ptnew->prstate = PR_CURR;
 	preempt = QUANTUM;		/* Reset time slice for process	*/
-
+	ptold->prcpuused += (clktimefine - ptold->prctxswstart);
 	/* remember current time since boot */
 	ptnew->prctxswstart = clktimefine;
 	/* add the the CPU time for which the new process ran */ 
-	ptold->prcpuused += (clktimefine - ptold->prctxswstart);
 
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 	/* Old process returns here when resumed */
