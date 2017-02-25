@@ -18,13 +18,9 @@ status	insert_new(
 	if (isbadqid(q) || isbadpid(pid)) {
 		return SYSERR;
 	}
-	
-	int x = MAXKEY - key;
-	
-	//kprintf("[+] 1\n");
 	curr = firstid(q);
 	
-	while (  queuetab[curr].qkey >= x) {
+	while (  queuetab[curr].qkey <= key) {
 		curr = queuetab[curr].qnext;
 	}
 	//kprintf("[+] 2\n");

@@ -14,6 +14,8 @@ extern	void	arp_hton(struct arppacket *);
 /* in file insertTime.c */
 status	insert_new(pid32 pid, qid16 q,  int32 key);
 
+/* in file newqueuereverse.c */
+extern  qid16   newqueuereverse(void);
 
 /* in file rcreate.c */
 extern	pid32	rcreate(void *, uint32, pri16, char *, uint32, ...);

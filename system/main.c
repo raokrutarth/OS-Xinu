@@ -7,7 +7,6 @@
 
 void looper(int n)
 {
-	int  a = 0;
 	while(TRUE)
 		kprintf("[looper%d] \n",n);
 	return;
@@ -19,6 +18,7 @@ void blocker()
 		int i;
 		kprintf("[blocker]\n");
 		for(i = 0; i < 500000; i++);
+			kprintf("[blocker_for%d]\n", i);
 		sleepms(12);
 	}		
 	return;
@@ -39,8 +39,8 @@ process	main(void)
 	if(PROB == 3)
 	{
 		pid32 s_id1 = create(looper, 515, 19, "looper1", 1, 1);
-		pid32 s_id2 = create(looper, 515, 19, "looper2", 1, 1);
-		pid32 s_id3 = create(blocker, 515, 19, "blocker", 0);
+		pid32 s_id2 = create(looper, 515, 19, "looper2", 1, 2);
+		pid32 s_id3 = create(looper, 585, 19, "looper3", 1, 3);
 		resume(s_id1);
 		resume(s_id2);
 		resume(s_id3);
@@ -59,7 +59,10 @@ process	main(void)
 		prptr = &proctab[s_id3];
 		sleeperTime =  prptr->prcpuused;
 		kprintf("[main] blocker used %d ms\n", sleeperTime);
-			
+
+		while(TRUE);
+
+		return OK;			
 	}
 	/* Problem 4 */
 	if(PROB == 4)

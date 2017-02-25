@@ -22,10 +22,9 @@ status	ready(
 
 	prptr = &proctab[pid];
 	prptr->prstate = PR_READY;
-	if()
-	prptr->prprio = MAXKEY - prptr->prcpuused;
-	kprintf("[2] Inserting process %s, with prio: %u, cpuused: %d, MAXKEY: %u", prptr->prname, prptr->prprio, prptr->prcpuused, MAXKEY);
-	insert(pid, readylist, prptr->prprio);
+	// prptr->prprio = MAXKEY - prptr->prcpuused;
+	kprintf("[2] Inserting process %s, with prio: %u, cpuused: %d, MAXKEY: %u\n", prptr->prname, prptr->prprio, prptr->prcpuused, MAXKEY);
+	insert_new(pid, readylist, prptr->prcpuused);
 	resched();
 
 	return OK;

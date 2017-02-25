@@ -38,15 +38,13 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 		if ( ptold->prprio > firstkey(readylist) ) {
 			return;
 		}
-		//double inversePrio = 1.0 / (ptold->prcpuused);
-		//uint32 newPrio = (int) (inversePrio * 1000);
-		//ptold->prprio = newPrio;
 		/* Old process will no longer remain current */
 		ptold->prstate = PR_READY;	
 		
 		//kprintf("null proc cpu used: %d", ptold->prcpuused);
 		//kprintf("[1] Inserting process %s, with prio: %d\n", ptold->prname, ptold->prprio);	
-		insert(currpid, readylist, ptold->prprio);
+		//insert(currpid, readylist, ptold->prprio);
+		insert_new(currpid, readylist, ptold->prcpuused);
 	}
 
 	/* Force context switch to highest priority ready process */
@@ -58,7 +56,7 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	/* remember current time since boot */
 	ptnew->prctxswstart = clktimefine;
 	
-	kprintf("[1] Switching to process %s, with prio: %d\n", ptold->prname, ptold->prprio);	
+	kprintf("[1] Switching (@ clktimefine: %u) to process %s, with prio: %d\n", clktimefine, ptnew->prname, ptnew->prprio);	
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 
 	/* Old process returns here when resumed */
