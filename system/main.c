@@ -5,11 +5,11 @@
 
 #define PROB  3 //problem #
 
-void looper()
+void looper(int n)
 {
 	int  a = 0;
 	while(TRUE)
-		kprintf("[looper] \n");
+		kprintf("[looper%d] \n",n);
 	return;
 }
 void blocker()
@@ -17,6 +17,7 @@ void blocker()
 	while(TRUE)
 	{
 		int i;
+		kprintf("[blocker]\n");
 		for(i = 0; i < 500000; i++);
 		sleepms(12);
 	}		
@@ -37,8 +38,8 @@ process	main(void)
 	/* Problem 3 */
 	if(PROB == 3)
 	{
-		pid32 s_id1 = create(looper, 515, 19, "looper1", 0);
-		pid32 s_id2 = create(looper, 515, 19, "looper2", 0);
+		pid32 s_id1 = create(looper, 515, 19, "looper1", 1, 1);
+		pid32 s_id2 = create(looper, 515, 19, "looper2", 1, 1);
 		pid32 s_id3 = create(blocker, 515, 19, "blocker", 0);
 		resume(s_id1);
 		resume(s_id2);

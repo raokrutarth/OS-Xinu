@@ -24,10 +24,18 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	ptold = &proctab[currpid];
 
+	if(ptold->prcpuused != MAXKEY) //null proc has MAXKEY as cpuused. keep it that way to avoid overflow
+	{
+		/* add the the CPU time for which the outgoing process ran */ 
+		ptold->prcpuused += (clktimefine - ptold->prctxswstart);
+		/* new process priority is lower if cpu used is greater */
+		ptold->prprio = MAXKEY - ptold->prcpuused;
+	}	
+
 	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
 
 		//kprintf("[1] comparing prio_old (%s): %u, prio_list : %u\n", ptold->prname, ptold->prprio, firstkey(readylist) );
-		if (ptold->prprio > firstkey(readylist) ) {
+		if ( ptold->prprio > firstkey(readylist) ) {
 			return;
 		}
 		//double inversePrio = 1.0 / (ptold->prcpuused);
@@ -35,24 +43,24 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 		//ptold->prprio = newPrio;
 		/* Old process will no longer remain current */
 		ptold->prstate = PR_READY;	
-		ptold->prprio = MAXKEY - ptold->prcpuused;
+		
 		//kprintf("null proc cpu used: %d", ptold->prcpuused);
-		//kprintf("[1] Inserting process %s, with prio: %d", ptold->prname, ptold->prprio);	
+		//kprintf("[1] Inserting process %s, with prio: %d\n", ptold->prname, ptold->prprio);	
 		insert(currpid, readylist, ptold->prprio);
 	}
 
 	/* Force context switch to highest priority ready process */
-
 	currpid = dequeue(readylist);
 	ptnew = &proctab[currpid];
 	ptnew->prstate = PR_CURR;
 	preempt = QUANTUM;		/* Reset time slice for process	*/
-	ptold->prcpuused += (clktimefine - ptold->prctxswstart);
+	
 	/* remember current time since boot */
 	ptnew->prctxswstart = clktimefine;
-	/* add the the CPU time for which the new process ran */ 
-
+	
+	kprintf("[1] Switching to process %s, with prio: %d\n", ptold->prname, ptold->prprio);	
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
+
 	/* Old process returns here when resumed */
 	return;
 }
