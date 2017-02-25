@@ -24,26 +24,26 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	ptold = &proctab[currpid];
 
-	if(ptold->prcpuused != MAXKEY) //null proc has MAXKEY as cpuused. keep it that way to avoid overflow
+	if( ptold->prcpuused != MAXKEY) //null proc has MAXKEY as cpuused. keep it that way to avoid overflow
 	{
 		/* add the the CPU time for which the outgoing process ran */ 
 		ptold->prcpuused += (clktimefine - ptold->prctxswstart);
-		/* new process priority is lower if cpu used is greater */
-		ptold->prprio = MAXKEY - ptold->prcpuused;
+		//  /* new process priority is lower if cpu used is greater */
+		// ptold->prprio = MAXKEY - ptold->prcpuused;
 	}	
 
 	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
 
-		//kprintf("[1] comparing prio_old (%s): %u, prio_list : %u\n", ptold->prname, ptold->prprio, firstkey(readylist) );
-		if ( ptold->prprio > firstkey(readylist) ) {
+		// kprintf("[1] comparing prio_old (%s): %u, prio_list : %u\n", ptold->prname, ptold->prprio, firstkey(readylist) );
+		if ( ptold->prcpuused < firstkey(readylist) ) {
 			return;
 		}
 		/* Old process will no longer remain current */
 		ptold->prstate = PR_READY;	
 		
-		//kprintf("null proc cpu used: %d", ptold->prcpuused);
-		//kprintf("[1] Inserting process %s, with prio: %d\n", ptold->prname, ptold->prprio);	
-		//insert(currpid, readylist, ptold->prprio);
+		// kprintf("null proc cpu used: %d", ptold->prcpuused);
+		// kprintf("[1] Inserting process %s, with prio: %d\n", ptold->prname, ptold->prprio);	
+		// insert(currpid, readylist, ptold->prprio);
 		insert_new(currpid, readylist, ptold->prcpuused);
 	}
 

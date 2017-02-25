@@ -45,6 +45,8 @@ process	main(void)
 		resume(s_id2);
 		resume(s_id3);
 		sleepms(5000);
+		kill(s_id1);
+
 		
 		kprintf("[main] sleeping for 5 sec @ clktimefine : %d\n", clktimefine);
 		struct	procent	*prptr;
@@ -58,11 +60,7 @@ process	main(void)
 		
 		prptr = &proctab[s_id3];
 		sleeperTime =  prptr->prcpuused;
-		kprintf("[main] blocker used %d ms\n", sleeperTime);
-
-		while(TRUE);
-
-		return OK;			
+		kprintf("[main] blocker used %d ms\n", sleeperTime);			
 	}
 	/* Problem 4 */
 	if(PROB == 4)

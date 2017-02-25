@@ -20,7 +20,7 @@ status	insert_new(
 	}
 	curr = firstid(q);
 	
-	while (  queuetab[curr].qkey <= key) {
+	while (  queuetab[curr].qkey < key) {
 		curr = queuetab[curr].qnext;
 	}
 	//kprintf("[+] 2\n");
