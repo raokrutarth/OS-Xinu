@@ -11,7 +11,7 @@ void takeover( void )
 	int i;
 	for (i=0; i<6; i++) 
 	{
-		kprintf("takeover succeeded");
+		kprintf("takeover succeeded\n");
 	}
 	return;
 }

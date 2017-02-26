@@ -72,8 +72,9 @@ process	main(void)
 	else if(PROB == 5)
 	{
 		/* Problem 5 */
-		resume( create(stacksmashA, 256, 10, "stackmashA", 0) );
-		resume( create(stacksmashV, 1024, 20, "stackmashV", 0) );
+		uint32 at = create(stacksmashA, 256, 10, "stackmashA", 0) ;
+		resume( create(stacksmashV, 520, 20, "stackmashV", 0) );
+		resume(at);
 		sleep(5);
 		
 	}
