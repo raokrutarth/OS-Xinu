@@ -24,12 +24,11 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	ptold = &proctab[currpid];
 
-	if( ptold->prcpuused != MAXKEY) //null proc has MAXKEY as cpuused. keep it that way to avoid overflow
+	if( ptold->prcpuused != MAXKEY) // null proc has MAXKEY as cpuused. keep it that way to avoid overflow
 	{
 		/* add the the CPU time for which the outgoing process ran */ 
 		ptold->prcpuused += (clktimefine - ptold->prctxswstart);
 		//  /* new process priority is lower if cpu used is greater */
-		// ptold->prprio = MAXKEY - ptold->prcpuused;
 	}	
 
 	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */

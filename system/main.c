@@ -21,7 +21,7 @@ void blocker()
 	{
 		int i;
 		kprintf("[blocker]\n");
-		for(i = 0; i < 500000; i++);
+		for(i = 0; i < 500000; i++)
 			kprintf("[blocker_for%d]\n", i);
 		sleepms(12);
 	}		
@@ -40,53 +40,47 @@ process	main(void)
 	/* run test cases for each problem by changing PROB variable in main.c */
 	
 	/* Problem 3 */
-	if(PROB == 3)
+	if(PROB == 3 || PROB == 4)
 	{
-		pid32 s_id1 = create(looper, 515, 0, "looper1", 1, 1);
-		pid32 s_id2 = create(looper, 515, 0, "looper2", 1, 2);
-		
+		pid32 s_id1 = create(looper, 515, 50, "looper1", 1, 1);
+		pid32 s_id2 = create(blocker, 515, 10, "blocker", 0);		
 		resume(s_id1);
 		resume(s_id2);
-		
+
 		sleepms(5000);
-		kill(s_id1);
-		kill(s_id2);
-		
-		kprintf("[main] sleeping for 5 sec @ clktimefine : %d\n", clktimefine);
+				
+		kprintf("[main]Resumed after sleeping for 5 sec @ clktimefine : %d\n", clktimefine);
 		struct	procent	*prptr;
+
 		prptr = &proctab[s_id1];
 		uint32 sleeperTime =  prptr->prcpuused;
 		kprintf("[main] looper1 used %d ms\n", sleeperTime);
+		kill(s_id1);
 		
 		prptr = &proctab[s_id2];
 		sleeperTime =  prptr->prcpuused;
-		kprintf("[main] looper2 used %d ms\n", sleeperTime);
+		kprintf("[main] blocker used %d ms\n", sleeperTime);
+		kill(s_id2);
 		
 		return OK;			
-	}
-	/* Problem 4 */
-	if(PROB == 4)
-	{
-		
 	}
 	else if(PROB == 5)
 	{
 		/* Problem 5 */
-		uint32 at = create(stacksmashA, 256, 10, "stackmashA", 0) ;
-		resume( create(stacksmashV, 520, 20, "stackmashV", 0) );
+
+		// Initilize the attacker stack on top of victim
+		uint32 at = create(stacksmashA, 256, 50, "stackmashA", 0) ;
+
+		// Allow victim to print V and call sleep
+		resume( create(stacksmashV, 520, 50, "stackmashV", 0) );
+
+		// begin attacking
 		resume(at);
+
+		// prevent attacker from getting switched out by making main sleep
 		sleep(5);
-		
-	}
-	else if(PROB == 6)
-	{
-		/* problem 6 */
-		
-	}
-	else if(PROB == 7)
-	{
-		/*use rcreate to start looper */
-		
+
+		return OK;		
 	}
 	else
 	{
