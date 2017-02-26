@@ -56,7 +56,7 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	/* remember current time since boot */
 	ptnew->prctxswstart = clktimefine;
 	
-	kprintf("[1] Switching (@ clktimefine: %u) to process %s, with prio: %d\n", clktimefine, ptnew->prname, ptnew->prprio);	
+	// kprintf("[1] Switching (@ clktimefine: %u) to process %s, with prio: %d\n", clktimefine, ptnew->prname, ptnew->prprio);	
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 
 	/* Old process returns here when resumed */

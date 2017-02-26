@@ -3,6 +3,6 @@
 void stacksmashV(void)
 {
 	putc(stdout, 'V');
-	sleepms(200);
+	sleepms(500);
 	putc(stdout, 'V');
 }

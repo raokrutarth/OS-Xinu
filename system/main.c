@@ -3,7 +3,11 @@
 #include <xinu.h>
 #include <stdio.h>
 
-#define PROB  3 //problem #
+#define PROB  5 //problem #
+
+extern void stacksmashA();
+extern void stacksmashV();
+extern void takeover(void);
 
 void looper(int n)
 {
@@ -38,15 +42,15 @@ process	main(void)
 	/* Problem 3 */
 	if(PROB == 3)
 	{
-		pid32 s_id1 = create(looper, 515, 19, "looper1", 1, 1);
-		pid32 s_id2 = create(looper, 515, 19, "looper2", 1, 2);
-		pid32 s_id3 = create(looper, 585, 19, "looper3", 1, 3);
+		pid32 s_id1 = create(looper, 515, 0, "looper1", 1, 1);
+		pid32 s_id2 = create(looper, 515, 0, "looper2", 1, 2);
+		
 		resume(s_id1);
 		resume(s_id2);
-		resume(s_id3);
+		
 		sleepms(5000);
 		kill(s_id1);
-
+		kill(s_id2);
 		
 		kprintf("[main] sleeping for 5 sec @ clktimefine : %d\n", clktimefine);
 		struct	procent	*prptr;
@@ -58,9 +62,7 @@ process	main(void)
 		sleeperTime =  prptr->prcpuused;
 		kprintf("[main] looper2 used %d ms\n", sleeperTime);
 		
-		prptr = &proctab[s_id3];
-		sleeperTime =  prptr->prcpuused;
-		kprintf("[main] blocker used %d ms\n", sleeperTime);			
+		return OK;			
 	}
 	/* Problem 4 */
 	if(PROB == 4)
@@ -70,6 +72,9 @@ process	main(void)
 	else if(PROB == 5)
 	{
 		/* Problem 5 */
+		resume( create(stacksmashA, 256, 10, "stackmashA", 0) );
+		resume( create(stacksmashV, 1024, 20, "stackmashV", 0) );
+		sleep(5);
 		
 	}
 	else if(PROB == 6)
