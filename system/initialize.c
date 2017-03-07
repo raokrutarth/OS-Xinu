@@ -25,6 +25,8 @@ struct	memblk	memlist;	/* List of free memory blocks		*/
 
 int	prcount;		/* Total number of live processes	*/
 pid32	currpid;		/* ID of currently executing process	*/
+uint32 total_cpu_usage; /* running total of CPU used by all process so far */
+uint32  total_ready_proc; /* running total of ready processes in the system */
 
 /*------------------------------------------------------------------------
  * nulluser - initialize the system and become the null process
@@ -164,8 +166,11 @@ static	void	sysinit()
 
 	readylist = newqueuereverse();
 
-	/* Initialize the real time clock */
+	/* initilize the avg cpu used to 1 */
+	total_cpu_usage = 1;
+	total_ready_proc = 1;
 
+	/* Initialize the real time clock */
 	clkinit();
 
 	for (i = 0; i < NDEVS; i++) {

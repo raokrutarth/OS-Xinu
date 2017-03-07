@@ -25,6 +25,8 @@ status	ready(
 	// prptr->prprio = MAXKEY - prptr->prcpuused;
 	// kprintf("[2] Inserting process %s, with prio: %u, cpuused: %d, MAXKEY: %u\n", prptr->prname, prptr->prprio, prptr->prcpuused, MAXKEY);
 	insert_new(pid, readylist, prptr->prcpuused);
+	total_ready_proc++; /* maintain # of entries in the readylist */
+	
 	resched();
 
 	return OK;

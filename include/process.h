@@ -62,3 +62,12 @@ struct procent {		/* Entry in the process table		*/
 extern	struct	procent proctab[];
 extern	int32	prcount;	/* Currently active processes		*/
 extern	pid32	currpid;	/* Currently executing process		*/
+extern  uint32 total_cpu_usage; /* running total of CPU used by all process so far */
+extern  uint32  total_ready_proc; /* running total of ready processes in the system */
+
+
+
+
+
+
+

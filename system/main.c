@@ -3,11 +3,11 @@
 #include <xinu.h>
 #include <stdio.h>
 
-#define PROB  5 //problem #
+#define PROB  3 //problem #
 
-extern void stacksmashA();
-extern void stacksmashV();
-extern void takeover(void);
+extern void cpubnd(void);
+extern void iobnd(void);
+
 
 void looper(int n)
 {
@@ -27,6 +27,21 @@ void blocker()
 	}		
 	return;
 }
+void print_proc_cpu()
+{
+	struct	procent	*prptr;
+	kprintf("Printing cputime of existing processes...\n");
+	int i;
+	for (i = 1; i < NPROC; i++) 
+	{
+		prptr = &proctab[i];
+		if (prptr->prstate == PR_FREE ) //|| i == currpid) 
+		{  /* skip unused slots	*/
+			continue;
+		}
+		kprintf("(PID: %u) -> cputime: %u\n", i, prptr->prcpuused );
+	}
+}
 
 
 process	main(void)
@@ -42,45 +57,56 @@ process	main(void)
 	/* Problem 3 */
 	if(PROB == 3 || PROB == 4)
 	{
-		pid32 s_id1 = create(looper, 515, 50, "looper1", 1, 1);
-		pid32 s_id2 = create(blocker, 515, 10, "blocker", 0);		
+		struct	procent	*prptr;
+		int i = 0;
+		kprintf("[main]Begin main @ clktimefine : %d\n", clktimefine);
+		print_proc_cpu();
+		
+		kprintf("[main]resuming new process @ clktimefine : %u, total_used time: %u, processes: %u\n", clktimefine, total_cpu_usage, total_ready_proc);
+		print_proc_cpu();
+		pid32 s_id1 = create(iobnd, 515, 50, "iobnd1", 1, 1);		
 		resume(s_id1);
+
+		kprintf("[main]resuming new process @ clktimefine : %u, total_used time: %u, processes: %u\n", clktimefine, total_cpu_usage, total_ready_proc);
+		print_proc_cpu();
+		pid32 s_id2 = create(iobnd, 515, 40, "iobnd2", 0);		
 		resume(s_id2);
+
+		kprintf("[main]resuming new process @ clktimefine : %u, total_used time: %u, processes: %u\n", clktimefine, total_cpu_usage, total_ready_proc);
+		print_proc_cpu();
+		pid32 s_id3 = create(iobnd, 515, 30, "iobnd3", 0);		
+		resume(s_id3);
+
 
 		sleepms(5000);
 				
 		kprintf("[main]Resumed after sleeping for 5 sec @ clktimefine : %d\n", clktimefine);
-		struct	procent	*prptr;
+		kprintf("Printing cputime of existing processes...\n");
+		for (i = 1; i < NPROC; i++) 
+		{
+			prptr = &proctab[i];
+			if (prptr->prstate == PR_FREE || i == currpid) {  /* skip unused slots	*/
+				continue;
+			}
+			kprintf("(PID: %u) -> cputime: %u\n", i, prptr->prcpuused );
+		}
 
 		prptr = &proctab[s_id1];
 		uint32 sleeperTime =  prptr->prcpuused;
-		kprintf("[main] looper1 used %d ms\n", sleeperTime);
+		kprintf("[main] iobnd1 used %u ms\n", sleeperTime);
 		kill(s_id1);
 		
 		prptr = &proctab[s_id2];
-		sleeperTime =  prptr->prcpuused;
-		kprintf("[main] blocker used %d ms\n", sleeperTime);
+		sleeperTime = prptr->prcpuused;
+		kprintf("[main] iobnd1 used %d ms\n", sleeperTime);
 		kill(s_id2);
-		
+
+		prptr = &proctab[s_id3];
+		sleeperTime =  prptr->prcpuused;
+		kprintf("[main] iobnd3 used %d ms\n", sleeperTime);
+		kill(s_id3);
+
 		return OK;			
-	}
-	else if(PROB == 5)
-	{
-		/* Problem 5 */
-
-		// Initilize the attacker stack on top of victim
-		uint32 at = create(stacksmashA, 256, 50, "stackmashA", 0) ;
-
-		// Allow victim to print V and call sleep
-		resume( create(stacksmashV, 520, 50, "stackmashV", 0) );
-
-		// begin attacking
-		resume(at);
-
-		// prevent attacker from getting switched out by making main sleep
-		sleep(5);
-
-		return OK;		
 	}
 	else
 	{

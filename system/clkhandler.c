@@ -33,7 +33,7 @@ void	clkhandler()
 		/* Decrement the delay for the first process on the	*/
 		/*   sleep queue, and awaken if the count reaches zero	*/
 		if((--queuetab[firstid(sleepq)].qkey) <= 0) {
-			wakeup();
+			wakeup();			
 		}
 	}
 	/* Decrement the preemption counter, and reschedule when the */

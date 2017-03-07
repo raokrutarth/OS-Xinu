@@ -8,8 +8,8 @@
 
 void cpubnd()
 {
-	uint32 LOOP1 = 50;
-	uint32 LOOP2 = 5; 
+	uint32 LOOP1 = 5705845;
+	uint32 LOOP2 = 590001; 
 	uint32 i, j;
 	for (i=0; i<LOOP1; i++) 
 	{
@@ -24,7 +24,7 @@ void cpubnd()
 		// the process's priority, and the remaining time slice (preempt).
 		struct	procent	*prptr;
 		prptr = &proctab[currpid];
-		kprintf("currpid: %d, for_i : %d, priority(cpuused): %u, preempt: %d\n", currpid, i, prptr->prcpuused, preempt);
+		//kprintf("currpid: %d, for_i : %d, priority(cpuused): %u, preempt: %d\n", currpid, i, prptr->prcpuused, preempt);
 	}
 	// Print the CPU time consumed by the process that is recorded in the
 	// prcpuused field of the current process's process table entry.

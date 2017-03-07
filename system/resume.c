@@ -25,6 +25,7 @@ pri16	resume(
 		return (pri16)SYSERR;
 	}
 	prio = prptr->prprio;		/* Record priority to return	*/
+	++total_ready_proc; /* Increase the number of ready processes by 1 */
 	ready(pid);
 	restore(mask);
 	return prio;
