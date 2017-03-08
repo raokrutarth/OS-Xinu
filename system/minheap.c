@@ -35,156 +35,167 @@ pid32 heapgetitem(pid32 pid)
 	return -1;
 }
 
-
-/*
-    Function to initialize the min heap with size = 0
-*/
-minHeap initMinHeap(int size) {
-    minHeap hp ;
-    hp.size = 0 ;
-    return hp ;
-}
-
-
-/*
-    Function to swap data within two nodes of the min heap using pointers
-*/
-void swap(node *n1, node *n2) {
-    node temp = *n1 ;
-    *n1 = *n2 ;
-    *n2 = temp ;
-}
-
-
-/*
-    Heapify function is used to make sure that the heap property is never violated
-    In case of deletion of a node, or creating a min heap from an array, heap property
-    may be violated. In such cases, heapify function can be called to make sure that
-    heap property is never violated
-*/
-void heapify(minHeap *hp, int i) 
-{
-
-    int smallest = (LCHILD(i) < hp->size && hp->elem[LCHILD(i)].data < hp->elem[i].data) ? LCHILD(i) : i ;
-    if(RCHILD(i) < hp->size && hp->elem[RCHILD(i)].data < hp->elem[smallest].data) 
+ 
+void h_insert(heapNode aNode, heapNode* heap, int size) {
+    int idx;
+    heapNode tmp;
+    idx = size + 1;
+    heap[idx] = aNode;
+    while (heap[idx].key < heap[idx/2].key && idx > 1) 
     {
-        smallest = RCHILD(i) ;
-    }
-    if(smallest != i) 
-    {
-        swap(&(hp->elem[i]), &(hp->elem[smallest])) ;
-        heapify(hp, smallest) ;
+        tmp = heap[idx];
+        heap[idx] = heap[idx/2];
+        heap[idx/2] = tmp;
+        idx /= 2;
     }
 }
-
-
-/* 
-    Build a Min Heap given an array of numbers
-    Instead of using insertNode() function n times for total complexity of O(nlogn),
-    we can use the buildMinHeap() function to build the heap in O(n) time
-*/
-/*void buildMinHeap(minHeap *hp, int *arr, int size) 
+ 
+void shiftdown(heapNode* heap, int size, int idx) 
 {
-    int i ;
-
-    // Insertion into the heap without violating the shape property
-    for(i = 0; i < size; i++) 
+    int cidx;        //index for child
+    heapNode tmp;
+    for (;;) 
     {
-        if(hp->size) 
+        cidx = idx*2;
+        if (cidx > size) 
         {
-            hp->elem = realloc(hp->elem, (hp->size + 1) * sizeof(node)) ;
+            break;   //it has no child
+        }
+        if (cidx < size) 
+        {
+            if (heap[cidx].key > heap[cidx+1].key) 
+            {
+                ++cidx;
+            }
+        }
+        //swap if necessary
+        if (heap[cidx].key < heap[idx].key) 
+        {
+            tmp = heap[cidx];
+            heap[cidx] = heap[idx];
+            heap[idx] = tmp;
+            idx = cidx;
         } 
         else 
         {
-            hp->elem = malloc(sizeof(node)) ;
+            break;
         }
-        node nd ;
-        nd.data = arr[i] ;
-        hp->elem[(hp->size)++] = nd ;
     }
+}
+void shiftUp2(heapNode *heap, int size, int idx)
+{
+    int parent = PARENT(idx);
+    heapNode tmp;
+    while (idx > 1 && parent > 0 && heap[idx].key < heap[parent].key )
+    {        
+        tmp = heap[parent];
+        heap[parent] = heap[idx];
+        heap[idx] = tmp;
 
-    // Making sure that heap property is also satisfied
-    for(i = (hp->size - 1) / 2; i >= 0; i--) 
+        idx = parent;
+        parent = PARENT(idx);
+    }
+}
+/**
+     * Sift up to make sure the heap property is not broken. This method is used
+     * when a new element is added to the heap and we need to make sure that it
+     * is at the right spot.
+*/
+void shiftUp(heapNode* heap, int size, int index) 
+{
+    heapNode tmp;
+    if (index > 0 && index < size)
     {
-        heapify(hp, i) ;
+        int parent = PARENT(index);
+        if (heap[parent].key > heap[index].key) {
+            tmp = heap[parent];
+            heap[parent] = heap[index];
+            heap[index] = tmp;
+            shiftUp(heap, size, parent);
+        }
     }
-}*/
-
-
-/*
-    Function to insert a node into the min heap, by allocating space for that node in the
-    heap and also making sure that the heap property and shape propety are never violated.
-*/
-void insertNode(minHeap *hp, int data) {
-    node nd;
-    nd.data = data ;
-
-    int i = (hp->size)++ ;
-    while(i && nd.data < hp->elem[PARENT(i)].data) 
+}
+void removeAt(heapNode* heap, int size, int where) 
+{
+    // This should never happen, you should ensure to call it only with valid indices
+    if (size == 0 || where >= size)
     {
-        hp->elem[i] = hp->elem[PARENT(i)] ;
-        i = PARENT(i) ;
+        kprintf("HEAP ERROR in removeAt!!! \n");
+        return;
     }
-    hp->elem[i] = nd ;
-}
-
-
-/*
-    Function to delete a node from the min heap
-    It shall remove the root node, and place the last node in its place
-    and then call heapify function to make sure that the heap property
-    is never violated
-*/
-void deleteNode(minHeap *hp) {
-    if(hp->size) {
-        printf("Deleting node %d\n\n", hp->elem[0].data) ;
-        hp->elem[0] = hp->elem[--(hp->size)] ;
-        heapify(hp, 0) ;
-}
-}
-
-
-/*
-    Function to get maximum node from a min heap
-    The maximum node shall always be one of the leaf nodes. So we shall recursively
-    move through both left and right child, until we find their maximum nodes, and
-    compare which is larger. It shall be done recursively until we get the maximum
-    node
-*/
-int getMaxNode(minHeap *hp, int i) {
-    if(LCHILD(i) >= hp->size) {
-        return hp->elem[i].data ;
+        
+    // Now for the working cases
+    if (where == size ) {
+        // removing the final leaf, trivial
+        return;
     }
-
-    int l = getMaxNode(hp, LCHILD(i)) ;
-    int r = getMaxNode(hp, RCHILD(i)) ;
-
-    if(l >= r) {
-        return l ;
-    } else {
-        return r ;
+    // other nodes
+    // place last leaf into place where deletion occurs
+    heap[where] = heap[size];
+    // take note that we have now one element less
+    --size;
+    // the new node here can be smaller than the previous,
+    // so it might be smaller than the parent, therefore sift up
+    // if that is the case
+    if (where > 0 && heap[where].key < heap[PARENT(where)].key ) 
+    {
+        shiftUp2(heap, size, where);
+    } 
+    else if (where < size/2) 
+    {
+        // Now, if where has a child, the new value could be larger
+        // than that of the child, therefore sift down
+        shiftdown(heap, size, where);
     }
 }
 
-
-/*
-    Function to clear the memory allocated for the min heap
-*/
-/*void deleteMinHeap(minHeap *hp) {
-    free(hp->elem) ;
-}*/
-
-/*
-    Function to display all the nodes in the min heap by doing a inorder traversal
-*/
-void inorderTraversal(minHeap *hp, int i) {
-    if(LCHILD(i) < hp->size) {
-        inorderTraversal(hp, LCHILD(i)) ;
+void removeProc(heapNode* heap, int size, pid32 pid) 
+{
+    int i;
+    for(i = 0; i < size; ++i)
+    {
+        if (heap[i].pid == pid) 
+        {
+            removeAt(heap, size, i);
+            return;
+        }
     }
-    printf("%d ", hp->elem[i].data) ;
-    if(RCHILD(i) < hp->size) {
-        inorderTraversal(hp, RCHILD(i)) ;
-    }
+    // The process was not found
 }
-
+ 
+heapNode removeMin(heapNode* heap, int size) {
+    heapNode rv = heap[1];
+    //printf("%d:%d:%dn", size, heap[1].key, heap[size].key);
+    heap[1] = heap[size];
+    --size;
+    shiftdown(heap, size, 1);
+    return rv;
+}
+void h_remove(HPQ *q, pid32 pid)
+{
+    removeProc(q->heap, q->size, pid);
+    --q->size;
+}
+void h_enqueue(heapNode node, HPQ *q) {
+    h_insert(node, q->heap, q->size);
+    ++q->size;
+}
+ 
+heapNode h_dequeue(HPQ *q) 
+{
+    if(q->size > 0)
+    {
+        heapNode rv = removeMin(q->heap, q->size);
+        --q->size;
+        return rv;
+    }
+    heapNode err;
+    err.key = ERR_KEY;
+    err.pid = -1;
+    return err;    
+}
+ 
+void initQueue(HPQ *q, int n) {
+   q->size = 0;
+}
 

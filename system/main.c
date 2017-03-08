@@ -3,7 +3,7 @@
 #include <xinu.h>
 #include <stdio.h>
 
-#define PROB  3 //problem #
+#define PROB  4 //problem #
 
 extern void cpubnd(void);
 extern void iobnd(void);
@@ -55,7 +55,7 @@ process	main(void)
 	/* run test cases for each problem by changing PROB variable in main.c */
 	
 	/* Problem 3 */
-	if(PROB == 3 || PROB == 4)
+	if(PROB == 3)
 	{
 		struct	procent	*prptr;
 		int i = 0;
@@ -107,6 +107,43 @@ process	main(void)
 		kill(s_id3);
 
 		return OK;			
+	}
+	else if(PROB == 4)
+	{
+		int n; 
+	    int i;
+	    HPQ q;
+	    heapNode hn;
+	    n = 15;
+	    initQueue(&q, n);
+	    uint32 a[15] = {99, 1123, 645, 12, 723,74599, 7361, 55, 9876, 854, 47, 1, 3, 87, 748};
+
+	    for (i = 0; i < n; ++i) 
+	    {
+	        hn.key = a[i];
+	        hn.pid = i;
+	        printf("enqueue node with key: %u, pid: %d\n", hn.key, hn.pid);
+	        h_enqueue(hn, &q);
+	    }
+		
+		printf("[+] all items added, queue size: %d\n", q.size);
+	    pid32 to_rem =  3;
+	    h_remove(&q, to_rem);
+	    printf("[+] removed process with pid: %d\n", to_rem);
+
+	    to_rem =  0;
+	    h_remove(&q, to_rem);
+	    printf("[+] removed process with pid: %d\n", to_rem);
+
+	    printf("dequeue all values:\n");
+	    n = q.size;
+	    for (; q.size > 0; ) 
+	    {
+	        hn = h_dequeue(&q);
+	        printf("dequeued node with key: %u, pid: %d (queue size: %d)\n", hn.key, hn.pid, q.size);
+	    }
+
+	    return OK;
 	}
 	else
 	{
