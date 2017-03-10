@@ -163,9 +163,8 @@ static	void	sysinit()
 	bufinit();
 
 	/* Create a ready list for processes */
-
-	//readylist = newqueuereverse();
-	newheap(); // new heap readylist
+	// readylist = newqueuereverse();
+	newheap(); // min heap queue for log(n) performance readylist
 
 	/* initilize the avg cpu used to 1 */
 	total_cpu_usage = 1;

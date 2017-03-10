@@ -49,8 +49,7 @@ pid32	create(
 	prptr->prstkbase = (char *)saddr;
 	prptr->prstklen = ssize;
 	prptr->prname[PNMLEN-1] = NULLCH;
-	for (i=0 ; i<PNMLEN-1 && (prptr->prname[i]=name[i])!=NULLCH; i++)
-		;
+	for (i=0 ; i<PNMLEN-1 && (prptr->prname[i]=name[i])!=NULLCH; i++);
 	prptr->prsem = -1;
 	prptr->prparent = (pid32)getpid();
 	prptr->prhasmsg = FALSE;
@@ -60,10 +59,10 @@ pid32	create(
 	prptr->prdesc[1] = CONSOLE;
 	prptr->prdesc[2] = CONSOLE;
 
-	// kprintf("[create] total_cpu_usage:  %u, total_ready_proc : %u\n", total_cpu_usage, total_ready_proc );
+	kprintf("[create] total_cpu_usage:  %u, total_ready_proc : %u\n", total_cpu_usage, total_ready_proc );
 	/* set CPU time used so far to avg of cpu used by all existing processes */
 	prptr->prcpuused = (total_cpu_usage) / (total_ready_proc+1); 
-	// kprintf("[create] time assigned to new process %u ms\n", prptr->prcpuused );
+	kprintf("[create] time assigned to new process %u ms\n", prptr->prcpuused );
 
 	/* Initialize stack as if the process was called		*/
 

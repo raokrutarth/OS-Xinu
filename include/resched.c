@@ -33,14 +33,11 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 		total_cpu_usage += used;
 	}	
 
-	if (ptold->prstate == PR_CURR) 
-	{  /* Process remains eligible */
+	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
 
 		// kprintf("[1] comparing prio_old (%s): %u, prio_list : %u\n", ptold->prname, ptold->prprio, firstkey(readylist) );
-		uint32 mhk = (uint32)heapminkey();
-		if(mhk == EMPTY)
-			kprintf("8888888\n");
-		if ( ptold->prcpuused < mhk ) 
+		uint32 heapMinKey = (unit32) heapMinKey();
+		if ( ptold->prcpuused < heapMinKey) //firstkey(readylist) ) 
 		{		
 			/* update the point at which to begin timing again since the same 
 			continues running process */
@@ -51,16 +48,17 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 		ptold->prstate = PR_READY;	
 		
 		// kprintf("null proc cpu used: %d", ptold->prcpuused);
-		// kprintf("[1] Inserting process %s, with prio: %d\n", ptold->prname, ptold->prprio);	
-		// insert(currpid, readylist, ptold->prprio);
+		// kprintf("[1] Inserting process %s, with prio: %d\n", ptold->prname, ptold->prprio);
 		// insert_new(currpid, readylist, ptold->prcpuused);
-		heapinsert(currpid, ptold->prcpuused);
-		// kprintf("[+] increasing total_ready_proc in resched\n");
+		heapinsert( currpid, ptold->prcpuused);
+		total_ready_proc++; /* maintain # of entries in the readylist */
 	}
 
 	/* Force context switch to highest priority ready process */
 	// currpid = dequeue(readylist);
-	currpid = heapgethead();	
+	currpid = heapgethead();
+	total_ready_proc--; /* maintain # of entries in the readylist */
+	
 	
 	ptnew = &proctab[currpid];
 	ptnew->prstate = PR_CURR;

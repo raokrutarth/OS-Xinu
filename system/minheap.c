@@ -6,48 +6,73 @@
 
 #include <xinu.h>
 
-//#include <stdio.h>
-
 
 status newheap()
 {
+    initQueue(&heap_queue);
 	return OK;
 }
 
-
 status heapinsert( pid32 pid, int32 key)
 {
-	return OK;
+    heapNode newNode;
+    newNode.key = key;
+    newNode.pid = pid;
+    h_enqueue(newNode, &heap_queue);
+    // kprintf("[+] Increasing total_ready_proc with pid: %d\n", pid);
+    total_ready_proc++; /* maintain # of entries in the readylist */
+    return OK;
 }
 
 pid32 heapgethead()
 {
-	return -1;
+    HPQ *hq = &heap_queue;
+    // kprintf("[-] Decreasing total_ready_proc\n");
+    total_ready_proc--; /* maintain # of entries in the readylist */
+    if(hq->size > 0)
+    {
+        heapNode ret = h_dequeue(&heap_queue);
+        return ret.pid;
+    }
+	return EMPTY;
 }
 
 int32 heapminkey()
 {
-	return -1;
+	HPQ *hq = &heap_queue;
+    if(hq->size > 0)
+    {
+        heapNode ret = h_dequeue(&heap_queue);
+        h_enqueue(ret, &heap_queue);
+        return ret.key;
+    }
+    return EMPTY;
 }
 
 pid32 heapgetitem(pid32 pid)
 {
-	return -1;
+	return h_remove(&heap_queue, pid);
 }
 
  
-void h_insert(heapNode aNode, heapNode* heap, int size) {
+status h_insert(heapNode aNode, heapNode* heap, int size) 
+{
+    if(size > NPROC)
+    {
+        return SYSERR;
+    }
     int idx;
     heapNode tmp;
     idx = size + 1;
     heap[idx] = aNode;
-    while (heap[idx].key < heap[idx/2].key && idx > 1) 
+    while (heap[idx].key < heap[PARENT(idx)].key && idx > 1) 
     {
         tmp = heap[idx];
-        heap[idx] = heap[idx/2];
-        heap[idx/2] = tmp;
-        idx /= 2;
+        heap[idx] = heap[PARENT(idx)];
+        heap[PARENT(idx)] = tmp;
+        idx = PARENT(idx);
     }
+    return OK;
 }
  
 void shiftdown(heapNode* heap, int size, int idx) 
@@ -65,6 +90,7 @@ void shiftdown(heapNode* heap, int size, int idx)
         {
             if (heap[cidx].key > heap[cidx+1].key) 
             {
+                // pick the smallest child
                 ++cidx;
             }
         }
@@ -82,7 +108,12 @@ void shiftdown(heapNode* heap, int size, int idx)
         }
     }
 }
-void shiftUp2(heapNode *heap, int size, int idx)
+/**
+     * Sift up to make sure the heap property is not broken. This method is used
+     * when a new element is added to the heap and we need to make sure that it
+     * is at the right spot.
+*/
+void shiftUp(heapNode *heap, int size, int idx)
 {
     int parent = PARENT(idx);
     heapNode tmp;
@@ -94,25 +125,6 @@ void shiftUp2(heapNode *heap, int size, int idx)
 
         idx = parent;
         parent = PARENT(idx);
-    }
-}
-/**
-     * Sift up to make sure the heap property is not broken. This method is used
-     * when a new element is added to the heap and we need to make sure that it
-     * is at the right spot.
-*/
-void shiftUp(heapNode* heap, int size, int index) 
-{
-    heapNode tmp;
-    if (index > 0 && index < size)
-    {
-        int parent = PARENT(index);
-        if (heap[parent].key > heap[index].key) {
-            tmp = heap[parent];
-            heap[parent] = heap[index];
-            heap[index] = tmp;
-            shiftUp(heap, size, parent);
-        }
     }
 }
 void removeAt(heapNode* heap, int size, int where) 
@@ -131,6 +143,7 @@ void removeAt(heapNode* heap, int size, int where)
     }
     // other nodes
     // place last leaf into place where deletion occurs
+    // printf("%d:%d:%d\n", where, heap[where].key, heap[size].key);
     heap[where] = heap[size];
     // take note that we have now one element less
     --size;
@@ -139,31 +152,18 @@ void removeAt(heapNode* heap, int size, int where)
     // if that is the case
     if (where > 0 && heap[where].key < heap[PARENT(where)].key ) 
     {
-        shiftUp2(heap, size, where);
+        shiftUp(heap, size, where);
     } 
-    else if (where < size/2) 
+    else //if (where < size/2) 
     {
         // Now, if where has a child, the new value could be larger
         // than that of the child, therefore sift down
         shiftdown(heap, size, where);
     }
 }
-
-void removeProc(heapNode* heap, int size, pid32 pid) 
-{
-    int i;
-    for(i = 0; i < size; ++i)
-    {
-        if (heap[i].pid == pid) 
-        {
-            removeAt(heap, size, i);
-            return;
-        }
-    }
-    // The process was not found
-}
  
-heapNode removeMin(heapNode* heap, int size) {
+heapNode removeMin(heapNode* heap, int size) 
+{
     heapNode rv = heap[1];
     //printf("%d:%d:%dn", size, heap[1].key, heap[size].key);
     heap[1] = heap[size];
@@ -171,12 +171,28 @@ heapNode removeMin(heapNode* heap, int size) {
     shiftdown(heap, size, 1);
     return rv;
 }
-void h_remove(HPQ *q, pid32 pid)
+pid32 h_remove(HPQ *q, pid32 pid)
 {
-    removeProc(q->heap, q->size, pid);
+    if(q->size < 1)
+    {
+        kprintf("HEAP error! h_remove called on empty heap\n");
+        return SYSERR;
+    }
+	int i;
+	int size = q->size;
+    for(i = 1; i < size; ++i)
+    {
+        if (q->heap[i].pid == pid) 
+        {
+            removeAt(q->heap, size, i);
+            break;
+        }
+    }    
     --q->size;
+    return pid;
 }
-void h_enqueue(heapNode node, HPQ *q) {
+void h_enqueue(heapNode node, HPQ *q) 
+{
     h_insert(node, q->heap, q->size);
     ++q->size;
 }
@@ -195,7 +211,8 @@ heapNode h_dequeue(HPQ *q)
     return err;    
 }
  
-void initQueue(HPQ *q, int n) {
+void initQueue(HPQ *q) 
+{
    q->size = 0;
 }
 

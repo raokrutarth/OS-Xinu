@@ -3,7 +3,7 @@
 #include <xinu.h>
 #include <stdio.h>
 
-#define PROB  4 //problem #
+#define PROB  3 //problem #
 
 extern void cpubnd(void);
 extern void iobnd(void);
@@ -32,14 +32,14 @@ void print_proc_cpu()
 	struct	procent	*prptr;
 	kprintf("Printing cputime of existing processes...\n");
 	int i;
-	for (i = 1; i < NPROC; i++) 
+	for (i = 0; i < NPROC; i++) 
 	{
 		prptr = &proctab[i];
 		if (prptr->prstate == PR_FREE ) //|| i == currpid) 
 		{  /* skip unused slots	*/
 			continue;
 		}
-		kprintf("(PID: %u) -> cputime: %u\n", i, prptr->prcpuused );
+		kprintf("(PID: %u)[%s] -> cputime: %u\n", i, prptr->prname, prptr->prcpuused );
 	}
 }
 
@@ -58,13 +58,12 @@ process	main(void)
 	if(PROB == 3)
 	{
 		struct	procent	*prptr;
-		int i = 0;
-		kprintf("[main]Begin main @ clktimefine : %d\n", clktimefine);
+		kprintf("[main]Begin main @ clktimefine : %d, total_cpu_usage:  %u, total_ready_proc : %u\n", clktimefine, total_cpu_usage, total_ready_proc);
 		print_proc_cpu();
 		
 		kprintf("[main]resuming new process @ clktimefine : %u, total_used time: %u, processes: %u\n", clktimefine, total_cpu_usage, total_ready_proc);
 		print_proc_cpu();
-		pid32 s_id1 = create(iobnd, 515, 50, "iobnd1", 1, 1);		
+		pid32 s_id1 = create(iobnd, 515, 50, "iobnd1", 0);		
 		resume(s_id1);
 
 		kprintf("[main]resuming new process @ clktimefine : %u, total_used time: %u, processes: %u\n", clktimefine, total_cpu_usage, total_ready_proc);
@@ -81,15 +80,7 @@ process	main(void)
 		sleepms(5000);
 				
 		kprintf("[main]Resumed after sleeping for 5 sec @ clktimefine : %d\n", clktimefine);
-		kprintf("Printing cputime of existing processes...\n");
-		for (i = 1; i < NPROC; i++) 
-		{
-			prptr = &proctab[i];
-			if (prptr->prstate == PR_FREE || i == currpid) {  /* skip unused slots	*/
-				continue;
-			}
-			kprintf("(PID: %u) -> cputime: %u\n", i, prptr->prcpuused );
-		}
+		print_proc_cpu();
 
 		prptr = &proctab[s_id1];
 		uint32 sleeperTime =  prptr->prcpuused;
@@ -114,9 +105,9 @@ process	main(void)
 	    int i;
 	    HPQ q;
 	    heapNode hn;
-	    n = 15;
-	    initQueue(&q, n);
-	    uint32 a[15] = {99, 1123, 645, 12, 723,74599, 7361, 55, 9876, 854, 47, 1, 3, 87, 748};
+	    n = 5;
+	    initQueue(&q);
+	    uint32 a[5] = {2, 584, 4, 1, 7};
 
 	    for (i = 0; i < n; ++i) 
 	    {
@@ -125,19 +116,17 @@ process	main(void)
 	        printf("enqueue node with key: %u, pid: %d\n", hn.key, hn.pid);
 	        h_enqueue(hn, &q);
 	    }
-		
-		printf("[+] all items added, queue size: %d\n", q.size);
-	    pid32 to_rem =  3;
+	    pid32 to_rem =  0;
 	    h_remove(&q, to_rem);
 	    printf("[+] removed process with pid: %d\n", to_rem);
 
-	    to_rem =  0;
+	    to_rem =  4;
 	    h_remove(&q, to_rem);
 	    printf("[+] removed process with pid: %d\n", to_rem);
 
 	    printf("dequeue all values:\n");
 	    n = q.size;
-	    for (; q.size > 0; ) 
+	    for (i = 0; i < n; i++) 
 	    {
 	        hn = h_dequeue(&q);
 	        printf("dequeued node with key: %u, pid: %d (queue size: %d)\n", hn.key, hn.pid, q.size);
