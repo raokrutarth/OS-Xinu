@@ -59,7 +59,7 @@ pid32	create(
 	prptr->prdesc[1] = CONSOLE;
 	prptr->prdesc[2] = CONSOLE;
 
-	kprintf("[create] total_cpu_usage:  %u, total_ready_proc : %u\n", total_cpu_usage, total_ready_proc );
+	// kprintf("[create] total_cpu_usage:  %u, total_ready_proc : %u\n", total_cpu_usage, total_ready_proc );
 	/* set CPU time used so far to avg of cpu used by all existing processes */
 	prptr->prcpuused = (total_cpu_usage) / (total_ready_proc+1); 
 	kprintf("[create] time assigned to new process %u ms\n", prptr->prcpuused );

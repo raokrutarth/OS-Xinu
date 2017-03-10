@@ -38,8 +38,6 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 		// kprintf("[1] comparing prio_old (%s): %u, prio_list : %u\n", ptold->prname, ptold->prprio, firstkey(readylist) );
 		uint32 mhk = (uint32)heapminkey();
-		if(mhk == EMPTY)
-			kprintf("8888888\n");
 		if ( ptold->prcpuused < mhk ) 
 		{		
 			/* update the point at which to begin timing again since the same 

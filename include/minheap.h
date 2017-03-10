@@ -13,7 +13,7 @@ typedef struct heapNode {
 } heapNode;
  
 typedef struct HPQ {
-    heapNode heap[NPROC];
+    heapNode heap[NPROC*2];
     int size;
 } HPQ;
 

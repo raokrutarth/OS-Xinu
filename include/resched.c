@@ -45,8 +45,7 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 			return;
 		}
 		/* Old process will no longer remain current */
-		ptold->prstate = PR_READY;	
-		
+		ptold->prstate = PR_READY;			
 		// kprintf("null proc cpu used: %d", ptold->prcpuused);
 		// kprintf("[1] Inserting process %s, with prio: %d\n", ptold->prname, ptold->prprio);
 		// insert_new(currpid, readylist, ptold->prcpuused);
