@@ -8,6 +8,8 @@
 volatile int global_ctr = 0;
 static sid32 sem_dd1;
 static sid32 sem_dd2;
+static sid32 sem_dd3;
+
 
 void p1(volatile int *a)
 {
@@ -15,9 +17,13 @@ void p1(volatile int *a)
 	waitdd(sem_dd1);
 	sleepms(5);
 	//signaldd(sem_dd1);
-	waitdd(sem_dd2);
+	if( waitdd(sem_dd2) == SYSERR_DD)
+		kprintf("[waitdd-p1-a] Cycle created. Wait not executed!\n");	
 	sleepms(5);
-	
+	//signaldd(sem_dd2);
+	if( waitdd(sem_dd3) == SYSERR_DD)
+		kprintf("[waitdd-p1-b] Cycle created. Wait not executed!\n");
+
 	kprintf("p1 finished\n");
 	return;
 }
@@ -27,29 +33,54 @@ void p2(volatile int *a)
 	kprintf("p2 started\n");
 	waitdd(sem_dd2);
 	sleepms(5);
-	//signaldd(sem_dd2);
-	waitdd(sem_dd1);
-	sleepms(5);
-	
+	// signaldd(sem_dd2);
+	if( waitdd(sem_dd1) == SYSERR_DD)
+		kprintf("[waitdd-p2-a] Cycle created. Wait not executed!\n");	
+	sleepms(5);	
+	// signaldd(sem_dd1);
+	if( waitdd(sem_dd3) == SYSERR_DD)
+		kprintf("[waitdd-p2-b] Cycle created. Wait not executed!\n");
+
 	kprintf("p2 finished\n");
 	return;
 }
 
+void p3(volatile int *a)
+{
+	kprintf("p3 started\n");
+	waitdd(sem_dd3);
+	sleepms(5);
+	// signaldd(sem_dd3);
+	if( waitdd(sem_dd1) == SYSERR_DD)
+		kprintf("[waitdd-p3-a] Cycle created. Wait not executed!\n");
+	sleepms(5);	
+	// signaldd(sem_dd1);
+	if( waitdd(sem_dd2) == SYSERR_DD)
+		kprintf("[waitdd-p3-b] Cycle created. Wait not executed!\n");
+
+	kprintf("p3 finished\n");
+	return;
+}
 
 process	main(void)
 {
-	kprintf("\nXINU [Krutarth Rao - 0027262283] \n");
-	sem_dd1 = semcreate(1);
-	sem_dd2 = semcreate(1);
+	kprintf("\nXINU [Krutarth Rao - 0027262283] \n");	
 	if(prob == 3)
 	{
+		sem_dd1 = semcreate(3);
+		sem_dd2 = semcreate(3);
+		sem_dd3 = semcreate(3);
+
 		pid32 s_id1 = create(p1, 515, 20, "p1", 1, &global_ctr);
-		pid32 s_id2 = create(p2, 515, 20, "p2", 1, &global_ctr);		
-		resume(s_id1);
+		pid32 s_id2 = create(p2, 515, 20, "p2", 1, &global_ctr);
+		pid32 s_id3 = create(p3, 515, 20, "p3", 1, &global_ctr);		
+		resume(s_id1);		
+		resume(s_id3);
 		resume(s_id2);
 		sleep(3);
 		kill(s_id1);
 		kill(s_id2);
+		kill(s_id3);
 		printGraph(resourceGraph);
 	}
 	else if (prob == 2)
