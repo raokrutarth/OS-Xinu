@@ -24,54 +24,27 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	ptold = &proctab[currpid];
 
-	if( ptold->prcpuused != MAXKEY) // null proc has MAXKEY as cpuused. keep it that way to avoid overflow
-	{
-		/* add the the CPU time for which the outgoing process ran */ 
-		uint32 used = (clktimefine - ptold->prctxswstart); // time used since it was switched out last
-		ptold->prcpuused += used;
-		// kprintf("[rescched] adding cpu_usage (= %u) to total from prio_old (%s)\n", used, ptold->prname);
-		total_cpu_usage += used;
-	}	
-
-	if (ptold->prstate == PR_CURR) 
-	{  /* Process remains eligible */
-
-		// kprintf("[1] comparing prio_old (%s): %u, prio_list : %u\n", ptold->prname, ptold->prprio, firstkey(readylist) );
-		uint32 mhk = (uint32)heapminkey();
-		if ( ptold->prcpuused < mhk ) 
-		{		
-			/* update the point at which to begin timing again since the same 
-			continues running process */
-			ptold->prctxswstart = clktimefine;
+	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
+		if (ptold->prprio > firstkey(readylist)) {
 			return;
 		}
+
 		/* Old process will no longer remain current */
-		ptold->prstate = PR_READY;	
-		
-		// kprintf("null proc cpu used: %d", ptold->prcpuused);
-		// kprintf("[1] Inserting process %s, with prio: %d\n", ptold->prname, ptold->prprio);	
-		// insert(currpid, readylist, ptold->prprio);
-		// insert_new(currpid, readylist, ptold->prcpuused);
-		heapinsert(currpid, ptold->prcpuused);
-		// kprintf("[+] increasing total_ready_proc in resched\n");
+
+		ptold->prstate = PR_READY;
+		insert(currpid, readylist, ptold->prprio);
 	}
 
 	/* Force context switch to highest priority ready process */
-	// currpid = dequeue(readylist);
-	currpid = heapgethead();	
-	
+
+	currpid = dequeue(readylist);
 	ptnew = &proctab[currpid];
 	ptnew->prstate = PR_CURR;
 	preempt = QUANTUM;		/* Reset time slice for process	*/
-	
-	/* remember current time since boot */
-	ptnew->prctxswstart = clktimefine;
-	
-	
-	// kprintf("[1] Switching (@ clktimefine: %u) to process %s, with prio: %d\n", clktimefine, ptnew->prname, ptnew->prprio);	
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 
 	/* Old process returns here when resumed */
+
 	return;
 }
 

@@ -40,4 +40,4 @@
 #include <multiboot.h>
 #include <stdio.h>
 #include <string.h>
-#include <minheap.h>
+#include <deadlock.h>

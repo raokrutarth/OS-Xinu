@@ -11,30 +11,13 @@ extern	void	arp_ntoh(struct arppacket *);
 extern	void	arp_hton(struct arppacket *);
 
 
-/* in file insertTime.c */
-status	insert_new(pid32 pid, qid16 q,  int32 key);
+extern	syscall	signaldd(sid32);
 
-/* in file newqueuereverse.c */
-extern  qid16   newqueuereverse(void);
-
-/* in file rcreate.c */
-extern	pid32	rcreate(void *, uint32, pri16, char *, uint32, ...);
-
-/* in file void printsegaddr.c */
-extern void printsegaddr();
+extern syscall waitdd(sid32);
 
 /* in file ascdate.c */
+
 extern	status	ascdate(uint32, char *);
-
-/* in net2hostlgcc.c */
-extern long net2hostlgcc(long tc);
-
-/* in file net2hostlasm.c */
-extern long net2hostlasm(long tc);
-
-/* in file net2hostl.S */
-
-extern	long net2hostl(long to_convert);
 
 /* in file bufinit.c */
 

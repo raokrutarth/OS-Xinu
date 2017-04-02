@@ -18,12 +18,10 @@
 				+ (uint32)sizeof(uint32)),	\
 				(uint32)roundmb(len) )
 
-struct	memblk	
-{			/* See roundmb & truncmb	*/
+struct	memblk	{			/* See roundmb & truncmb	*/
 	struct	memblk	*mnext;		/* Ptr to next free memory blk	*/
 	uint32	mlength;		/* Size of blk (includes memblk)*/
-};
-
+	};
 extern	struct	memblk	memlist;	/* Head of free memory list	*/
 extern	void	*minheap;		/* Start of heap		*/
 extern	void	*maxheap;		/* Highest valid heap address	*/

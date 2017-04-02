@@ -20,13 +20,11 @@ extern	void meminit(void);	/* Initializes the free memory list	*/
 struct	procent	proctab[NPROC];	/* Process table			*/
 struct	sentry	semtab[NSEM];	/* Semaphore table			*/
 struct	memblk	memlist;	/* List of free memory blocks		*/
-
+struct Graph* resourceGraph; /*resource graph for semaphores */
 /* Active system status */
 
 int	prcount;		/* Total number of live processes	*/
 pid32	currpid;		/* ID of currently executing process	*/
-uint32 total_cpu_usage; /* running total of CPU used by all process so far */
-uint32  total_ready_proc; /* running total of ready processes in the system */
 
 /*------------------------------------------------------------------------
  * nulluser - initialize the system and become the null process
@@ -146,7 +144,6 @@ static	void	sysinit()
 	prptr->prstkbase = getstk(NULLSTK);
 	prptr->prstklen = NULLSTK;
 	prptr->prstkptr = 0;
-	prptr->prcpuused = MAXKEY;
 	currpid = NULLPROC;
 	
 	/* Initialize semaphores */
@@ -164,14 +161,11 @@ static	void	sysinit()
 
 	/* Create a ready list for processes */
 
-	//readylist = newqueuereverse();
-	newheap(); // new heap readylist
-
-	/* initilize the avg cpu used to 1 */
-	total_cpu_usage = 1;
-	total_ready_proc = 1;
+	readylist = newqueue();
+	resourceGraph = createGraph(NPROC*4);
 
 	/* Initialize the real time clock */
+
 	clkinit();
 
 	for (i = 0; i < NDEVS; i++) {
