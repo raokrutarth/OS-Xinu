@@ -52,6 +52,10 @@ pid32	create(
 	prptr->prsem = -1;
 	prptr->prparent = (pid32)getpid();
 	prptr->prhasmsg = FALSE;
+	if(prptr->prparent > 2) // earlier process not made using create
+		prptr->sw_queue = newqueue(); // FIFO queue used to store processes waiting to talk to this proc
+	prptr->sndflag = 0; // nothing pending to send by current process
+	prptr->empty_swq = 1;
 
 	/* Set up stdin, stdout, and stderr descriptors for the shell	*/
 	prptr->prdesc[0] = CONSOLE;

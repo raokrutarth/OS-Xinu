@@ -10,6 +10,9 @@ extern	int32	arp_alloc();
 extern	void	arp_ntoh(struct arppacket *);
 extern	void	arp_hton(struct arppacket *);
 
+/* in file send.c */
+extern	syscall	sendbk(pid32, umsg32, int32);
+
 
 extern	syscall	signaldd(sid32);
 

@@ -3,7 +3,7 @@
 #include <xinu.h>
 #include <stdio.h>
 
-#define prob 3
+#define prob 4
 
 volatile int global_ctr = 0;
 static sid32 sem_dd1;
@@ -62,6 +62,31 @@ void p3(volatile int *a)
 	return;
 }
 
+
+void s_p1(pid32 toSend)
+{
+	umsg32 msg = (pid32)getpid();
+	kprintf("[s_p1] sending p1's pid %d to proc %d\n", msg, toSend);
+	sendbk(toSend, msg, 100);
+	sleep(5);
+	msg = receive();
+	kprintf("[s_p1] got message %d\n", msg);
+	return;
+}
+
+void s_p2()
+{
+	umsg32 msg = receive();
+	kprintf("[s_p2] got message %d\n", msg);
+	sleepms(5);
+	pid32 toSend = msg;
+	msg = 8000;
+	kprintf("[s_p2] sending message %d to %d\n", msg, toSend);
+	if (TIMEOUT == sendbk(toSend, msg, 4) )
+		kprintf("[-] \n");
+	return;
+}
+
 process	main(void)
 {
 	kprintf("\nXINU [Krutarth Rao - 0027262283] \n");	
@@ -110,7 +135,13 @@ process	main(void)
 	}
 	else if( prob == 4)
 	{
-
+		pid32 s_id2 = create(s_p2, 515, 20, "sw_p2", 0);
+		pid32 s_id1 = create(s_p1, 515, 20, "sw_p1", 1, s_id2);
+		resume(s_id1);
+		resume(s_id2);
+		sleep(3);
+		kill(s_id1);
+		kill(s_id2);		
 	}
 	else
 	{
