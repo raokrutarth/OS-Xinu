@@ -26,27 +26,33 @@ umsg32	receive(void)
 		if (qp->prstate == PR_SNDWAIT) {
 			unsleep(in_q);
 			ready(in_q);
-		}
-		restore(mask);
+		}		
 	}
 	else
 	{
-		kprintf("%d's swq(qid: %p) empty. reading from buffer\n", currpid, &(prptr->sw_queue) );
 		// prptr->empty_swq = 1; /* the waiting queue is empty */
 		// immediate message is available and queue is empty
 		if(prptr->prhasmsg == TRUE)
 		{
+			// kprintf("%d's swq(qid: %p) empty. reading from buffer\n", currpid, &(prptr->sw_queue) );
 			msg = prptr->prmsg;
-			prptr->prhasmsg = FALSE;
-			restore(mask);
+			prptr->prhasmsg = FALSE;			
 		}
 		else
 		{
 			// no messages/processes waiting to be delivered
+			// kprintf("%d's swq(qid: %p) empty. empty buffer going to PR_RECV state\n", currpid );
 			prptr->prstate = PR_RECV;
 			resched();
+			if(prptr->prhasmsg == TRUE)
+			{
+				msg = prptr->prmsg;
+				prptr->prhasmsg = FALSE;
+			}			
+			// kprintf("%d returning from PR_RECV state. msg: %u\n", currpid, msg );
 		}
-	}	
+	}
+	restore(mask);	
 	return msg;
 }
 

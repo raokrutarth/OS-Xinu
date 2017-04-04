@@ -28,8 +28,9 @@ syscall	sendbk(
 		restore(mask);
 		return SYSERR;
 	}
-	if( maxwait == 0 || prptr->prhasmsg == FALSE) // overwrite or recipient buffer is empty
+	if( maxwait == 0 || !prptr->prhasmsg) // overwrite or recipient buffer is empty
 	{
+		// kprintf("%d overwrote %d's buffer to %u\n", currpid, pid, msg);
 		prptr->prmsg = msg;
 		prptr->prhasmsg = TRUE;
 		// If recipient waiting or in timed-wait make it ready 
@@ -56,7 +57,7 @@ syscall	sendbk(
 		// for the receiving process.		
 		add_to_queue(&(prptr->sw_queue), currpid );
 		// kprintf("added %d to %d's swq(qid: %d)\n", currpid, pid, prptr->sw_queue);
-		kprintf("added %d to %d's swq(qid: %p)\n", currpid, pid, &(prptr->sw_queue) );
+		// kprintf("added %d to %d's swq(qid: %p)\n", currpid, pid, &(prptr->sw_queue) );
 
 		pr_curr->prstate = PR_SNDWAIT;
 		pr_curr->sndwaitmsg = msg;
