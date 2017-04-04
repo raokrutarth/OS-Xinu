@@ -63,50 +63,32 @@ void p3(volatile int *a)
 }
 
 
-void s_p1(pid32 toSend)
-{
-	umsg32 msg = (pid32)getpid();
-	kprintf("[s_p1] sending p1's pid %d to proc %d\n", msg, toSend);
-	sendbk(toSend, msg, 100);
-	sleep(5);
-	msg = receive();
-	kprintf("[s_p1] got message %d\n", msg);
-	return;
-}
-
-void s_p2()
-{
-	umsg32 msg = receive();
-	kprintf("[s_p2] got message %d\n", msg);
-	sleepms(5);
-	pid32 toSend = msg;
-	msg = 8000;
-	kprintf("[s_p2] sending message %d to %d\n", msg, toSend);
-	if (TIMEOUT == sendbk(toSend, msg, 4) )
-		kprintf("[-] \n");
-	return;
-}
+extern void testSendBlocking();
 
 process	main(void)
 {
 	kprintf("\nXINU [Krutarth Rao - 0027262283] \n");	
-	if(prob == 3)
+	
+	if( prob == 4)
 	{
-		sem_dd1 = semcreate(3);
-		sem_dd2 = semcreate(3);
-		sem_dd3 = semcreate(3);
+		testSendBlocking();
+	}
+	else if (prob == 41)
+	{
+		struct array_queue queue;
+		init_queue(&queue);
+		kprintf("adding...\n");
+		add_to_queue(&queue, 3);
+		add_to_queue(&queue, 5);
+		add_to_queue(&queue, 7);
+		add_to_queue(&queue, 9);
 
-		pid32 s_id1 = create(p1, 515, 20, "p1", 1, &global_ctr);
-		pid32 s_id2 = create(p2, 515, 20, "p2", 1, &global_ctr);
-		pid32 s_id3 = create(p3, 515, 20, "p3", 1, &global_ctr);		
-		resume(s_id1);		
-		resume(s_id3);
-		resume(s_id2);
-		sleep(3);
-		kill(s_id1);
-		kill(s_id2);
-		kill(s_id3);
-		printGraph(resourceGraph);
+		int value = read_from_queue(&queue);
+		while (EMPTY != value )
+		{
+			kprintf("dqd %d\n", value);
+			value = read_from_queue(&queue);
+		}
 	}
 	else if (prob == 2)
 	{
@@ -133,15 +115,23 @@ process	main(void)
 	    res = is_cycle(graph);
 	    printf("\nHas cycle: %d\n", res);
 	}
-	else if( prob == 4)
+	else if(prob == 3)
 	{
-		pid32 s_id2 = create(s_p2, 515, 20, "sw_p2", 0);
-		pid32 s_id1 = create(s_p1, 515, 20, "sw_p1", 1, s_id2);
-		resume(s_id1);
+		sem_dd1 = semcreate(3);
+		sem_dd2 = semcreate(3);
+		sem_dd3 = semcreate(3);
+
+		pid32 s_id1 = create(p1, 515, 20, "p1", 1, &global_ctr);
+		pid32 s_id2 = create(p2, 515, 20, "p2", 1, &global_ctr);
+		pid32 s_id3 = create(p3, 515, 20, "p3", 1, &global_ctr);		
+		resume(s_id1);		
+		resume(s_id3);
 		resume(s_id2);
 		sleep(3);
 		kill(s_id1);
-		kill(s_id2);		
+		kill(s_id2);
+		kill(s_id3);
+		printGraph(resourceGraph);
 	}
 	else
 	{

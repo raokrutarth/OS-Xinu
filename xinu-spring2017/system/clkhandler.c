@@ -22,6 +22,8 @@ void	clkhandler()
 
 		count1000 = 1000;
 	}
+	/* One millisecond has passed, so increment seconds count */
+	clktimefine++;
 
 	/* Handle sleeping processes if any exist */
 
@@ -30,7 +32,7 @@ void	clkhandler()
 		/* Decrement the delay for the first process on the	*/
 		/*   sleep queue, and awaken if the count reaches zero	*/
 
-		if((--queuetab[firstid(sleepq)].qkey) <= 0) {
+		if((--queuetab[firstid(sleepq)].qkey) <= 0) {			
 			wakeup();
 		}
 	}

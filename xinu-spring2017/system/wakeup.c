@@ -12,7 +12,8 @@ void	wakeup(void)
 
 	resched_cntl(DEFER_START);
 	while (nonempty(sleepq) && (firstkey(sleepq) <= 0)) {
-		ready(dequeue(sleepq));
+		pid32 toReady = dequeue(sleepq);
+		ready(toReady);
 	}
 
 	resched_cntl(DEFER_STOP);

@@ -57,8 +57,7 @@ struct procent {		/* Entry in the process table		*/
 	
 	umsg32 sndwaitmsg; /* waiting to send message */
 	char sndflag; /* see if a message needs to be sent */
-	qid16	sw_queue;		/* Queue of processes that are waiting to send to this proc*/
-	char  empty_swq;
+	struct array_queue sw_queue;		/* Queue of processes that are waiting to send to this proc*/
 };
 
 /* Marker for the top of a process stack (used to help detect overflow)	*/

@@ -2,6 +2,7 @@
 
 #include <kernel.h>
 #include <conf.h>
+#include <arrayqueue.h>
 #include <process.h>
 #include <queue.h>
 #include <resched.h>
@@ -41,3 +42,4 @@
 #include <stdio.h>
 #include <string.h>
 #include <deadlock.h>
+
