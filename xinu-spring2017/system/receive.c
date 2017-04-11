@@ -14,19 +14,23 @@ umsg32	receive(void)
 
 	mask = disable();
 	prptr = &proctab[currpid];
-		
-	pid32 in_q = read_from_queue(& (prptr->sw_queue) );
-	if(in_q != EMPTY) // processes blocked to send to this process
+	
+	if(prptr->prhasmsg == FALSE)
 	{
-		struct	procent * qp = &proctab[in_q];
-		kprintf("read %d's message from %d's swq\n", in_q, currpid);
-		msg = qp->sndwaitmsg;
-		qp->sndflag = 0; /* Reset message flag	to let sending process know the message was read */
-		// wake the process blocked on sendbk
-		if (qp->prstate == PR_SNDWAIT) {
-			unsleep(in_q);
-			ready(in_q);
-		}		
+
+		pid32 in_q = read_from_queue(& (prptr->sw_queue) );
+		if(in_q != EMPTY) // processes blocked to send to this process
+		{
+			struct	procent * qp = &proctab[in_q];
+			// kprintf("read %d's message from %d's swq\n", in_q, currpid);
+			msg = qp->sndwaitmsg;
+			qp->sndflag = 0; /* Reset message flag	to let sending process know the message was read */
+			// wake the process blocked on sendbk
+			if (qp->prstate == PR_SNDWAIT) {
+				unsleep(in_q);
+				ready(in_q);
+			}		
+		}
 	}
 	else
 	{

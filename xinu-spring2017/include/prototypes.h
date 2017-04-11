@@ -13,6 +13,9 @@ extern	void	arp_hton(struct arppacket *);
 /* in file send.c */
 extern	syscall	sendbk(pid32, umsg32, int32);
 
+// in file regcallback.c
+syscall regcallback( int (* func) (void) );
+
 
 extern	syscall	signaldd(sid32);
 
