@@ -23,7 +23,7 @@ umsg32	recvtime(
 
 	prptr = &proctab[currpid];
 	if (prptr->prhasmsg == FALSE) {	/* If message waiting, no delay	*/
-		if (insertd(currpid, sleepq, maxwait) == SYSERR) {
+		if (insertd(currpid,sleepq,maxwait) == SYSERR) {
 			restore(mask);
 			return SYSERR;
 		}

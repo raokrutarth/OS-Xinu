@@ -10,20 +10,23 @@ extern	int32	arp_alloc();
 extern	void	arp_ntoh(struct arppacket *);
 extern	void	arp_hton(struct arppacket *);
 
-/* in file send.c */
-extern	syscall	sendbk(pid32, umsg32, int32);
 
-// in file regcallback.c
-syscall regcallback( int (* func) (void) );
-
-
-extern	syscall	signaldd(sid32);
-
-extern syscall waitdd(sid32);
+// in file waitchld.c
+extern pid32 waitchld();
 
 /* in file ascdate.c */
 
 extern	status	ascdate(uint32, char *);
+
+// in file regcallbacksig.c
+extern syscall regcallbacksig( int (* func) (void), uint16 ssig, uint32 oparg );
+
+// in file regcallback.c
+extern syscall regcallback( int (* func) (void) );
+
+
+extern int waitchld(void);
+
 
 /* in file bufinit.c */
 

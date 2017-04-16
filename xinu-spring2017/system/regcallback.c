@@ -1,13 +1,20 @@
 #include <xinu.h>
 
 
-/*
-	A process registers a user callback function with the kernel 
-	requesting that it be executed on behalf of the process when
-	a 1-word message arrives 
-*/
+// For problem 3 only. Use regcallbacksig() for grading
 
-syscall regcallback( int (* func) (void) )
+syscall regcallback( int (* func) (void)  )
 {
-
+	intmask	mask;			/* Saved interrupt mask		*/
+	struct	procent *prptr;		/* Ptr to process' table entry	*/
+	mask = disable();
+	
+	prptr = &proctab[ currpid ];
+	
+	prptr->msg_cb_func = func;
+	prptr->load_msg_callback = 1;
+	
+	restore(mask);		/* Restore interrupts */
+	return OK;
 }
+

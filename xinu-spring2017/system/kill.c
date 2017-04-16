@@ -26,6 +26,16 @@ syscall	kill(
 	}
 
 	send(prptr->prparent, pid);
+	pid32 parent = prptr->prparent;
+	struct	procent *parent_ptr;
+	if(parent > 0)
+	{
+		parent_ptr = &proctab[parent];
+		parent_ptr->child_pr_killed = pid;
+		if(parent_ptr->prstate == WAITFORCHLD)
+			ready(parent); // parent was waiting for child to exit		
+	}
+
 	for (i=0; i<3; i++) {
 		close(prptr->prdesc[i]);
 	}

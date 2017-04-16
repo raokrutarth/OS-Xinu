@@ -16,8 +16,7 @@
 #define	PR_SUSP		5	/* Process is suspended			*/
 #define	PR_WAIT		6	/* Process is on semaphore queue	*/
 #define	PR_RECTIM	7	/* Process is receiving with timeout	*/
-#define	PR_SNDWAIT	8	/* Process is sending with timeout	*/
-
+#define WAITFORCHLD 8 /* process is waiting on a child to exit */
 
 /* Miscellaneous process definitions */
 
@@ -54,10 +53,18 @@ struct procent {		/* Entry in the process table		*/
 	umsg32	prmsg;		/* Message sent to this process		*/
 	bool8	prhasmsg;	/* Nonzero iff msg is valid		*/
 	int16	prdesc[NDESC];	/* Device descriptors for process	*/
+
+	pid32 child_pr_killed; // set to 1 when kill is called on a child
+	char monitor_child; // used for XINUSIGCHLD
+	uint32 pr_start; // set to clktimefine during create	
+	char load_msg_callback; // flag to check if valid call back is set
+	uint32 wall_time_limit;  // set during system call to register callback to wall time
+	char wall_time_set; // flag to check if valid wall time set
 	
-	umsg32 sndwaitmsg; /* waiting to send message */
-	char sndflag; /* see if a message needs to be sent */
-	struct array_queue sw_queue;		/* Queue of processes that are waiting to send to this proc*/
+	int (* msg_cb_func) (void); // set to the address of callback func during regcallback 
+	int (* wall_cb_func) (void); // set to the address of callback func during regcallback 
+	int (* chld_cb_func) (void); // set to the address of callback func during regcallback 
+	
 };
 
 /* Marker for the top of a process stack (used to help detect overflow)	*/

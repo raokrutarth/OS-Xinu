@@ -13,7 +13,6 @@ qid16	newqueue(void)
 
 	q = nextqid;
 	if (q > NQENT) {		/* Check for table overflow	*/
-		kprintf("------\n\n");
 		return SYSERR;
 	}
 

@@ -1,18 +1,13 @@
-/*  main.c  - main */
+﻿/*  main.c  - main */
 
 #include <xinu.h>
 #include <stdio.h>
 
-#define prob 3
+#define prob 4
 
-int32 msg_recv_cb(void) 
-{
-	umsg32 msgbuf;
-	msgbuf = receive();
-	return(OK);
-}
 
-extern void testSendBlocking();
+extern void testCallback();
+extern void testSignal();
 
 process	main(void)
 {
@@ -20,21 +15,20 @@ process	main(void)
 	
 	if( prob == 4)
 	{
-		if (regcallbacksig(&msg_recv_cb, XINUSIGXTIME, 5000) != OK) {
-	      kprintf("wall time handler registration failed\n");
-	      return 1;
-	   }
-	}
-	else if (prob == 2)
-	{
-		if (regcallback(&msg_recv_cb) != OK) {
-	      kprintf("callback function registration failed\n");
-	      return 1;
-	   }
+		testSignal();
 	}
 	else if(prob == 3)
 	{
-		testSendBlocking();
+		// in file testCallback.c
+		testCallback();		
+	}
+	else if (prob == 2)
+	{
+		while(TRUE)
+		{
+			kprintf("clktimefine: %u\n", clktimefine);
+			sleep(2);
+		}
 	}
 	else
 	{
@@ -50,4 +44,3 @@ process	main(void)
 	}
 	return OK;
 }
-

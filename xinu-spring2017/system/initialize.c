@@ -20,7 +20,7 @@ extern	void meminit(void);	/* Initializes the free memory list	*/
 struct	procent	proctab[NPROC];	/* Process table			*/
 struct	sentry	semtab[NSEM];	/* Semaphore table			*/
 struct	memblk	memlist;	/* List of free memory blocks		*/
-struct Graph* resourceGraph; /*resource graph for semaphores */
+
 /* Active system status */
 
 int	prcount;		/* Total number of live processes	*/
@@ -162,7 +162,6 @@ static	void	sysinit()
 	/* Create a ready list for processes */
 
 	readylist = newqueue();
-	resourceGraph = createGraph(NPROC*4);
 
 	/* Initialize the real time clock */
 

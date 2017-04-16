@@ -52,9 +52,18 @@ pid32	create(
 	prptr->prsem = -1;
 	prptr->prparent = (pid32)getpid();
 	prptr->prhasmsg = FALSE;
-	// if(prptr->prparent > 2) // earlier process not made using create
-	init_queue( &(prptr->sw_queue) ); // FIFO queue used to store processes waiting to talk to this proc
-	prptr->sndflag = 0; // nothing pending to send by current process
+	
+	prptr->child_pr_killed = NO;
+	prptr->pr_start = clktimefine;
+	prptr->msg_cb_func = NULL;
+	prptr->chld_cb_func = NULL;
+	prptr->wall_cb_func = NULL;
+	prptr->load_msg_callback = 0;
+	prptr->wall_time_limit = 0;
+	prptr->wall_time_set = 0; 
+	prptr->monitor_child = 0;
+	
+	
 
 	/* Set up stdin, stdout, and stderr descriptors for the shell	*/
 	prptr->prdesc[0] = CONSOLE;

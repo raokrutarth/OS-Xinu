@@ -4,6 +4,80 @@
 
 struct	defer	Defer;
 
+void checkWallCB(struct procent *ptcurr )
+{
+	intmask	mask;	
+	mask = disable();
+	if(currpid < 3 )
+	{
+		restore(mask);		
+		return;
+	}
+		
+	if(ptcurr->wall_time_set == 1) // XINUSIGXTIME registered
+	{
+		/* kprintf("[%d] clktimefine : %u, pr_start = %u, (clktimefine - ptcurr->pr_start) = %u\n", currpid,
+					clktimefine, ptcurr->pr_start, (clktimefine - ptcurr->pr_start)  );
+		kprintf("wall_time_limit: %u\n", ptcurr->wall_time_limit ); */
+		if( (clktimefine - ptcurr->pr_start) > ptcurr->wall_time_limit )
+		{
+			// process has run for more than wall time for XINUSIGXTIME
+			ptcurr->wall_cb_func() ;
+			ptcurr->wall_time_set = 0; // reset the flag 
+			restore(mask);		
+			return;
+		}
+	}
+	restore(mask);		
+	return;
+	
+}
+
+void checkCallback(struct procent *pte)
+{
+	intmask	mask;	
+	mask = disable();
+	struct procent *ptcurr;
+	ptcurr = pte;	
+
+	if(currpid < 3 )
+	{
+		restore(mask);		
+		return; // null proc, rdld & main proc do not have calllback functionality
+	}
+	
+	if( ptcurr->prhasmsg == TRUE)
+	{
+		// kprintf("[%d] Calling callback at address %d\n", currpid, ptcurr->callback_func);
+		if( ptcurr->load_msg_callback == 1) // XINUSIGRCV registered
+		{
+			
+			ptcurr->msg_cb_func() ;
+			// ptcurr->load_callback = 0; // once executed, reset callback	
+			// kprintf("[%d] returned from callback\n", currpid);
+			restore(mask);		
+			return;
+		}						
+		// else
+		// 	kprintf("[%d] Callback function not set\n", currpid);
+						
+	}
+	
+	checkWallCB(ptcurr);
+	
+	if (ptcurr->monitor_child == 1) // XINUSIGCHLD registered
+	{
+		if(ptcurr->child_pr_killed > NO ) //
+		{
+			ptcurr->child_pr_killed = NO;
+			ptcurr->chld_cb_func() ;
+			restore(mask);		
+			return;
+		}
+	}
+	restore(mask);		/* Restore interrupts */
+	return;
+}
 /*------------------------------------------------------------------------
  *  resched  -  Reschedule processor to highest priority eligible process
  *------------------------------------------------------------------------
@@ -26,11 +100,10 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
 		if (ptold->prprio > firstkey(readylist)) {
+			checkWallCB(ptold);
 			return;
 		}
-
 		/* Old process will no longer remain current */
-
 		ptold->prstate = PR_READY;
 		insert(currpid, readylist, ptold->prprio);
 	}
@@ -44,9 +117,8 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 
 	/* Old process returns here when resumed */
-	// Check for registered callback functions and run it
-	
-	
+	// Callback checks
+	checkCallback(ptold);
 	return;
 }
 
