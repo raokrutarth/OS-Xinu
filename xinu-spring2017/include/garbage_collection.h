@@ -3,7 +3,7 @@
 #define gc_h
 
 #define RECORD_SIZE 1000
-// define an array entry struct to save a block returned ffrom getmem()
+// define an array entry struct to save a block returned from getmem()
 struct allocated_block
 {
 	char *blkAddr;
@@ -18,7 +18,7 @@ struct allocated_mem
 
 syscall initMemRecord( struct allocated_mem * d_mem_record);
 
-syscall trackedBlock(struct allocated_mem * d_mem_record,  char* newBlkAddr, uint32 blkSize);
+syscall trackBlock(struct allocated_mem * d_mem_record,  char* newBlkAddr, uint32 blkSize);
 
 syscall untrackBlock(struct allocated_mem * d_mem_record,  char* newBlkAddr);
 

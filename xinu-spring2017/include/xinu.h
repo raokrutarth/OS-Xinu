@@ -2,6 +2,7 @@
 
 #include <kernel.h>
 #include <conf.h>
+#include <garbage_collection.h>
 #include <process.h>
 #include <queue.h>
 #include <resched.h>
@@ -21,7 +22,6 @@
 #include <lfilesys.h>
 #include <ether.h>
 #include <gpio.h>
-#include <garbage_collection.h>
 #include <net.h>
 #include <ip.h>
 #include <arp.h>

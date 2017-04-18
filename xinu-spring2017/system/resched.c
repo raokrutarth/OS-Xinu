@@ -21,8 +21,11 @@ void checkWallCB(struct procent *ptcurr )
 		kprintf("wall_time_limit: %u\n", ptcurr->wall_time_limit ); */
 		if( (clktimefine - ptcurr->pr_start) > ptcurr->wall_time_limit )
 		{
-			// process has run for more than wall time for XINUSIGXTIME
+			// process has run for more than wall time for XINUSIGXTIME			
+			restore(mask);	
 			ptcurr->wall_cb_func() ;
+			mask = disable();
+
 			ptcurr->wall_time_set = 0; // reset the flag 
 			restore(mask);		
 			return;
@@ -51,17 +54,17 @@ void checkCallback(struct procent *pte)
 		// kprintf("[%d] Calling callback at address %d\n", currpid, ptcurr->callback_func);
 		if( ptcurr->load_msg_callback == 1) // XINUSIGRCV registered
 		{
-			
+			restore(mask);
 			ptcurr->msg_cb_func() ;
+			mask = disable();
 			// ptcurr->load_callback = 0; // once executed, reset callback	
 			// kprintf("[%d] returned from callback\n", currpid);
-			restore(mask);		
-			return;
 		}						
 		// else
 		// 	kprintf("[%d] Callback function not set\n", currpid);
 						
 	}
+
 	
 	checkWallCB(ptcurr);
 	
@@ -70,8 +73,8 @@ void checkCallback(struct procent *pte)
 		if(ptcurr->child_pr_killed > NO ) //
 		{
 			ptcurr->child_pr_killed = NO;
+			restore(mask);
 			ptcurr->chld_cb_func() ;
-			restore(mask);		
 			return;
 		}
 	}

@@ -13,7 +13,11 @@ char  	*getmem(
 	intmask	mask;			/* Saved interrupt mask		*/
 	struct	memblk	*prev, *curr, *leftover;
 
+	struct procent *ptcurr; // used for GC
+
 	mask = disable();
+	ptcurr = &proctab[currpid];
+
 	if (nbytes == 0) {
 		restore(mask);
 		return (char *)SYSERR;
@@ -28,6 +32,15 @@ char  	*getmem(
 		if (curr->mlength == nbytes) {	/* Block is exact match	*/
 			prev->mnext = curr->mnext;
 			memlist.mlength -= nbytes;
+
+			// track block for GC
+			if(trackBlock( &(ptcurr->dmem),  (char *)(curr) , nbytes) != OK)
+			{
+				kprintf("[getmem] Unable to track allocated block\n");
+			}
+			else
+				kprintf("[getmem] tracking block. blkaddr: %u\n", curr);
+
 			restore(mask);
 			return (char *)(curr);
 
@@ -38,6 +51,14 @@ char  	*getmem(
 			leftover->mnext = curr->mnext;
 			leftover->mlength = curr->mlength - nbytes;
 			memlist.mlength -= nbytes;
+			// track block for GC
+			if(trackBlock( &(ptcurr->dmem),  (char *)(curr) , nbytes) != OK)
+			{
+				kprintf("[getmem] Unable to track allocated block\n");
+			}
+			else
+				kprintf("[getmem] tracking block. blkaddr: %u\n", curr);
+
 			restore(mask);
 			return (char *)(curr);
 		} else {			/* Move to next block	*/

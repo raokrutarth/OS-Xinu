@@ -21,6 +21,14 @@ syscall	kill(
 		return SYSERR;
 	}
 
+	/* Garbage Collection */
+	struct allocated_block b;
+	while( prptr->dmem.trackedBlocks > 0 )
+	{
+		b = popMemRecord( &(prptr->dmem) );
+		freemem(b.blkAddr, b.size);
+	}
+
 	if (--prcount <= 1) {		/* Last user process completes	*/
 		xdone();
 	}

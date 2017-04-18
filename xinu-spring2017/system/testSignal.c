@@ -108,8 +108,10 @@ void test3()
 	p1 = create(c_c_p1, 2000, 20, "c_p1", 0);
 	resume(p1);	
 	sleep(10);
-	
+	char * f = getmem(7650);
+	kprintf("[%d] got block: %u\n",getpid() , f);
 	kprintf("[%d] terminating child processes: %d, %d, %d\n", getpid(), dp1, dp2, dp3);
+
 	kill(dp1);
 	sleepms(200);
 	kill(dp2);

@@ -64,6 +64,8 @@ struct procent {		/* Entry in the process table		*/
 	int (* msg_cb_func) (void); // set to the address of callback func during regcallback 
 	int (* wall_cb_func) (void); // set to the address of callback func during regcallback 
 	int (* chld_cb_func) (void); // set to the address of callback func during regcallback 
+
+	struct allocated_mem dmem; // datastructure used to keep track of dynamically allocated memory to the proc
 	
 };
 
