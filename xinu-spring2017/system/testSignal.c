@@ -194,69 +194,62 @@ void test4()
 
 int response;
 int limit;
-char init_complete =0;
 char stop_server;
 int completed_serving;
 int nClients;
+pid32 serving_proc_s;
 
-void init_server()
+void init_server(pid32 server_pid)
 {
+	// send(server_pid, 0);
 	kprintf("[init] starting server\n");
 	response = 999;
 	limit = 5;
 	nClients = 0;
 	stop_server = 0;	
-	sleep(2);
+	sleepms(250);
+	return;
+}
+void cleanup_server()
+{
+	kprintf("[cleanup] cleaning up server\n");
+	response = -1;
+	limit = 0;
+	sleep(5);
 	return;
 }
 
-void stop_sv()
-{
-	stop_server = 1;
-}
-int32 completedService()
-{
-	completed_serving++;
-	return OK;
-}
 
-void serve_client()
+int32 serving()
 {
+	nClients++;
 	// intmask	mask;	
 	// mask = disable();
-	kprintf("[%d] Serving client..\n", getpid() );
+	// kprintf("[%d] Serving client..\n", getpid() );
 	umsg32 msgbuf;
 	msgbuf = receive();
 	pid32 toSend = (pid32) msgbuf;
-	// kprintf("[%d] Client server created.\nmsg: %u\n", getpid(), msgbuf);
-	msgbuf = receive();
-	send(toSend, response);
+	kprintf("[%d] Client sent msg: %u\n", getpid(), msgbuf);
 	
-	// restore(mask);
-
-	return;
-}
-int32 create_serving_proc()
-{
-	nClients++;
-	resume( create(serve_client, 2000, 20, "serve_client",0 ) );
+	kprintf("[%d] Sending response: %d to client\n", getpid(), response);
+	send(toSend, response);
+	nClients--;
 	return OK;
 }
 
-void client(pid32 serverAddr)
+void client(pid32 server_pid)
 {
-	sleepms(2000);
-	kprintf("[%d] Client sending it's pid to server\n", getpid() );
-	send(serverAddr, getpid() );
+	kprintf("[%d] Client sending it's pid to %d\n", getpid(), server_pid );
+	send(server_pid, getpid() );
 	umsg32 msgbuf;
 	msgbuf = receive();
-	kprintf("[%d] Server responded: %u\n", getpid(), msgbuf);
+	kprintf("[%d] Server responded: %d\n", getpid(), msgbuf);
 	while(1);
 }
 
 void server()
 {
-	pid32 init_proc = create(init_server, 2000, 20, "server_init",0 );
+	pid32 init_proc = create(init_server, 2000, 20, "server_init", 1, getpid() );
 	// run an init() function to setup  the server to serve clients.
 	resume( init_proc );
 	pid32 dc = waitchld();
@@ -264,47 +257,37 @@ void server()
 	// wait for init to complete
 	if(dc == init_proc)
 		kprintf("[%d] server_init complete\n", getpid() );
+	umsg32 msgbuf = receive();  // read the message from the kill() called on child
 
 	// Setup server to recieve new clients and serve them
-	if (regcallbacksig(&create_serving_proc, XINUSIGRCV, -1) != OK) {
-	      kprintf("sig msg handler registration failed\n");
-	      return;
-	}
-
-	// register callback to keep track of children that have terminated
-	//  That is, the number of clients that have been served
-	if (regcallbacksig(&completedService, XINUSIGCHLD, -1) != OK) {
-	      kprintf("sig child registration failed\n");
-	      return;
-	}
+	regcallbacksig(&serving, XINUSIGRCV, -1);	
 	
-	// // setup server to begin cleanup after 10 seconds
-	// // Similar to timeout, the server starts to wait for the existing 
-	// // clients to complete getting served.
-	// // It then begins the cleanup routine.
-	// if (regcallbacksig(&stop_sv, XINUSIGXTIME, 10000) != OK) {
-	//       kprintf("wall time handler registration failed\n");
-	//       return;
-	// }
-	// // busy wait till server-up time limit is reached
-	// while(stop_server != 1);
-	// kprintf("[%d] 10 seconds server up-time complete. Begin cleanup routine.\n", getpid() );
-	
-	// // wait till the clients completed serving = total clients
-	// while( completed_serving != nClients);
-	// kprintf("[%d] server completed serving clients. Terminating...\n", getpid() );
+	sleep(10);
+	// wait till the clients completed serving = total clients
+	if(  nClients == 0);
+	{
+		kprintf("[%d] server completed serving clients. @ clktimefine: %u\n", getpid(), clktimefine );
+		pid32 cl_id = create(cleanup_server, 2000, 20, "server_cleanup", 0 );
+		resume(cl_id);
+		dc = waitchld();
+		if(dc == cl_id)
+			kprintf("[%d] cleanup proc exited. Exiting server @ clktimefine: %u\n", getpid(), clktimefine);
+	}	
 	return;
 }
 
 void test5()
 {
+
+	kprintf("TEST 5\n");
+	
 	pid32 client_p, server_p;
 	
 	server_p = create(server, 2000, 20, "server", 0 );
 	client_p = create(client, 2000, 20, "client", 1, server_p );
 
 	resume(server_p);
-	
+	sleepms(100);
 	resume(client_p);
 	sleep(20);
 	kprintf("[%d] Killing server proc\n", getpid() );
@@ -319,11 +302,11 @@ void testSignal()
 {
 	kprintf("***	Testing signal handlers		***\n\n");
 	
-	// test1();
-	// test2();
-	// test3();
-	// test99();
-	// test4();
+	test1();
+	test2();
+	test3();
+	test99();
+	test4();
 	test5();
 	return;
 }
