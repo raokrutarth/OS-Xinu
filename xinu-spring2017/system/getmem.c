@@ -36,10 +36,11 @@ char  	*getmem(
 			// track block for GC
 			if(trackBlock( &(ptcurr->dmem),  (char *)(curr) , nbytes) != OK)
 			{
-				kprintf("[getmem] Unable to track allocated block\n");
+				// kprintf("[getmem][%d] Unable to track allocated block\n", getpid() );
 			}
-			else
-				kprintf("[getmem] tracking block. blkaddr: %u\n", curr);
+			// else
+				// kprintf("[getmem][%d] tracking block. blkaddr: %u\n", getpid(), curr );
+			print_dmem( &(ptcurr->dmem) );
 
 			restore(mask);
 			return (char *)(curr);
@@ -54,10 +55,11 @@ char  	*getmem(
 			// track block for GC
 			if(trackBlock( &(ptcurr->dmem),  (char *)(curr) , nbytes) != OK)
 			{
-				kprintf("[getmem] Unable to track allocated block\n");
+				// kprintf("[getmem][%d] Unable to track allocated block\n", getpid());
 			}
-			else
-				kprintf("[getmem] tracking block. blkaddr: %u\n", curr);
+			// else
+				// kprintf("[getmem][%d] tracking block. blkaddr: %u\n",  getpid(), curr );
+			// print_dmem( &(ptcurr->dmem) );
 
 			restore(mask);
 			return (char *)(curr);

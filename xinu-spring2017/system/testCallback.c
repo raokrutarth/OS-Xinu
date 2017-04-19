@@ -4,7 +4,7 @@ int32 msg_recv_cb(void)
 {
 	umsg32 msgbuf;
 	msgbuf = receive();
-	kprintf("[%d] callback executed.\nmsg: %u\n", getpid(), msgbuf);
+	kprintf("[%d] MSG RECV callback executed.\nmsg: %u\n", getpid(), msgbuf);
 	return(OK);
 }
 

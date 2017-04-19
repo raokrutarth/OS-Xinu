@@ -69,12 +69,14 @@ syscall	freemem(
 	/* GC */
 	struct procent *ptcurr;
 	ptcurr = &proctab[currpid];
+	// print_dmem(&(ptcurr->dmem));
 	if( untrackBlock( &(ptcurr->dmem),  blkaddr ) != OK)
 	{
-		kprintf("[freemem] Unable to untrack block from GC. blkaddr: %u\n", blkaddr);
+		// kprintf("[freemem][%d] Unable to untrack block from GC. blkaddr: %u\n", getpid() ,blkaddr  );
 	}
-	else
-		kprintf("[freemem] untracking block. blkaddr: %u\n", blkaddr);
+	// else
+	//	 kprintf("[freemem][%d] untracking block. blkaddr: %u\n", getpid() ,blkaddr );
+	// print_dmem(&(ptcurr->dmem));
 
 	restore(mask);
 	return OK;

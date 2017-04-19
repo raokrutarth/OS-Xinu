@@ -23,11 +23,17 @@ syscall	kill(
 
 	/* Garbage Collection */
 	struct allocated_block b;
-	while( prptr->dmem.trackedBlocks > 0 )
-	{
-		b = popMemRecord( &(prptr->dmem) );
+	b = (struct allocated_block) {0, 0};
+	pid32 temp = currpid;
+	currpid = pid;
+	b = popMemRecord( &(prptr->dmem) );
+	while( b.blkAddr != (char*)EMPTY )
+	{ 
+		// kprintf("[kill][%d] Freeing unfreed block. blkaddr: %u\n", currpid, (char*)b.blkAddr );
 		freemem(b.blkAddr, b.size);
+		b = popMemRecord( &(prptr->dmem) );
 	}
+	currpid = temp;
 
 	if (--prcount <= 1) {		/* Last user process completes	*/
 		xdone();

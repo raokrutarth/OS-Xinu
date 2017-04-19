@@ -16,7 +16,7 @@ syscall trackBlock(struct allocated_mem * d_mem_record,  char* newBlkAddr, uint3
 {
 	if(d_mem_record->trackedBlocks == RECORD_SIZE)
 		return SYSERR;
-	
+
 	d_mem_record->blocks[d_mem_record->trackedBlocks].blkAddr = newBlkAddr;
 	d_mem_record->blocks[d_mem_record->trackedBlocks].size = size;
 	d_mem_record->trackedBlocks++;
@@ -25,13 +25,16 @@ syscall trackBlock(struct allocated_mem * d_mem_record,  char* newBlkAddr, uint3
 
 syscall untrackBlock(struct allocated_mem * d_mem_record,  char* newBlkAddr)
 {
-	if(d_mem_record->trackedBlocks == 1)
+	if(d_mem_record->trackedBlocks == 1 && d_mem_record->blocks[0].blkAddr == newBlkAddr)
 	{
 		d_mem_record->blocks[0].blkAddr = (char*)EMPTY;
 		d_mem_record->blocks[0].size = 0;
 		d_mem_record->trackedBlocks--;
 		return OK;
 	}
+	else if( d_mem_record->trackedBlocks == 1 )
+		return SYSERR;
+		
 	int i, ei;
 	ei = -1;
 	for(i = 0; i < d_mem_record->trackedBlocks; i++)
@@ -72,4 +75,15 @@ struct allocated_block popMemRecord(struct allocated_mem * d_mem_record)
 	untrackBlock(d_mem_record, res.blkAddr);
 	// kprintf("[pop] returning block. addr: %d, @ trackedBlocks: %d\n", res.blkAddr, d_mem_record->trackedBlocks );
 	return res;
+}
+
+void print_dmem(struct allocated_mem * d_mem_record)
+{
+	int n = d_mem_record->trackedBlocks;
+	int i;
+	kprintf("dmem : { ");
+	for(i = 0; i < n;i++)
+		kprintf("%u ", d_mem_record->blocks[i].blkAddr );
+	kprintf("}\n");
+	return;
 }

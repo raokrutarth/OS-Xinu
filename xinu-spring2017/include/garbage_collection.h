@@ -24,5 +24,6 @@ syscall untrackBlock(struct allocated_mem * d_mem_record,  char* newBlkAddr);
 
 struct allocated_block popMemRecord(struct allocated_mem * d_mem_record);
 
+void print_dmem(struct allocated_mem * d_mem_record);
 
 #endif
