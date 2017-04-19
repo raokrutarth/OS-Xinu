@@ -15,6 +15,7 @@ process	main(void)
 	
 	if( prob == 4)
 	{
+		// in file testSignal.c
 		testSignal();
 	}
 	else if(prob == 3)
@@ -22,7 +23,7 @@ process	main(void)
 		// in file testCallback.c
 		testCallback();		
 	}
-	else if (prob == 2)
+	else if (prob == 2) // Bonus data structure test
 	{
 		// while(TRUE)
 		// {
